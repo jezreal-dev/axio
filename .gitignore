@@ -1,0 +1,35 @@
+# Environment & secrets (NEVER commit .env or credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# OS / IDE artifacts
+.DS_Store
+Thumbs.db
+*.swp
+
+# Downloaded hackathon workshop reference archives & guides (keep repo clean)
+Open_Agent_Hackathon_Workshop.zip
+builder resources/
+community and support/
+cursor/
+demo and submission resources/
+featured_resources/
+judge and mentor resources/
+Meterless/
+nvidia/
+rules and requirements/
+zetaris/

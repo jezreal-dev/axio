@@ -1,0 +1,4479 @@
+{
+  "run_id": "INC-8892",
+  "request_id": "INC-8892",
+  "incident_id": "INC-8892",
+  "trace_id": "trace-INC-8892",
+  "status": "success",
+  "track": "The Agent That Can Explain Why",
+  "execution_time_seconds": 1.267,
+  "log_file": "logs/trace-INC-8892.jsonl",
+  "log_path": "logs/trace-INC-8892.jsonl",
+  "agents_used": [
+    "PlannerAgent",
+    "ExecutorAgent",
+    "EvaluatorAgent",
+    "SynthesizerAgent",
+    "FinalReviewerAgent"
+  ],
+  "agents": [
+    {
+      "name": "PlannerAgent",
+      "role": "Decomposes incident into hypotheses and revises plan when Evaluator falsifies red herrings"
+    },
+    {
+      "name": "ExecutorAgent",
+      "role": "Executes cross-silo Zetaris SQL queries with live schema error recovery"
+    },
+    {
+      "name": "EvaluatorAgent",
+      "role": "Adversarial SRE critic running temporal precedence, contract ledger, cohort z-test & citation falsification"
+    },
+    {
+      "name": "SynthesizerAgent",
+      "role": "Drafts the cited Root-Cause & Financial Impact Brief"
+    },
+    {
+      "name": "FinalReviewerAgent",
+      "role": "Audits brief for correlation-vs-causation caveats and post-remediation verification SQL"
+    }
+  ],
+  "collaboration": {
+    "feedback_loop_completed": true,
+    "investigative_rounds": 2,
+    "hypotheses_tested": 3,
+    "hypotheses_falsified": 2,
+    "hypotheses_verified": 1,
+    "sql_schema_recoveries": 1,
+    "reviewer_revision_count": 1,
+    "evaluator_findings": [
+      "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+      "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause."
+    ]
+  },
+  "sponsor_technology": {
+    "zetaris": {
+      "backend": "sqlite-federation",
+      "catalogs": {
+        "billing": "billing",
+        "telemetry": "telemetry",
+        "ops": "ops"
+      },
+      "queries_executed": 27,
+      "schema_recoveries": [
+        {
+          "recovered": true,
+          "silo": "billing",
+          "table": "checkout_events",
+          "initial_error": "SQL error: no such column: platform",
+          "discovered_columns": [
+            "event_id",
+            "checkout_ref",
+            "tenant_id",
+            "created_at",
+            "amount_cents",
+            "currency",
+            "status",
+            "failure_code",
+            "device_os",
+            "app_version",
+            "region_code",
+            "channel"
+          ],
+          "inspected_schema": [
+            "event_id",
+            "checkout_ref",
+            "tenant_id",
+            "created_at",
+            "amount_cents",
+            "currency",
+            "status",
+            "failure_code",
+            "device_os",
+            "app_version",
+            "region_code",
+            "channel"
+          ],
+          "column_repairs": {
+            "timestamp": "created_at",
+            "platform": "device_os",
+            "client_version": "app_version",
+            "error_code": "failure_code"
+          },
+          "final_sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM {billing}.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC",
+          "repaired_sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM {billing}.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        }
+      ],
+      "query_log": [
+        {
+          "purpose": "ops surface scan: deployments on 2026-10-23",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 6,
+          "latency_ms": 6,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT deploy_id, service, version, commit_sha, author, deployed_at, summary FROM ops.deployments WHERE deployed_at >= '2026-10-23T00:00:00Z' ORDER BY deployed_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: support_tickets on 2026-10-23",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 2,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT ticket_id, tenant, opened_at, subject, body, priority FROM ops.support_tickets WHERE opened_at >= '2026-10-23T00:00:00Z' ORDER BY opened_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: flag_changes on 2026-10-23",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 2,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT change_id, flag_key, changed_at, actor, action, rollout_pct, targeting FROM ops.flag_changes WHERE changed_at >= '2026-10-23T00:00:00Z' ORDER BY changed_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: config_changes on 2026-10-23",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 2,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT change_id, service, config_key, old_value, new_value, changed_at, actor, scope FROM ops.config_changes WHERE changed_at >= '2026-10-23T00:00:00Z' ORDER BY changed_at ASC"
+        },
+        {
+          "purpose": "billing window breakdown (cross-silo column alignment)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 0,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "error",
+          "sql": "SELECT platform, client_version, status, error_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE timestamp >= '2026-10-23T02:01:00Z' AND timestamp < '2026-10-23T09:30:00Z' GROUP BY platform, client_version, status, error_code ORDER BY events DESC",
+          "error": "SQL error: no such column: platform"
+        },
+        {
+          "purpose": "schema discovery billing.checkout_events",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT * FROM billing.checkout_events LIMIT 1"
+        },
+        {
+          "purpose": "billing window breakdown (cross-silo column alignment) (repaired)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 15,
+          "latency_ms": 63,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        },
+        {
+          "purpose": "H1: measure earliest anomaly timestamp on /v1/orders/bulk",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 42,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T00:00:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H1: temporal precedence error split around 2026-10-23T09:10:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 25,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:10:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-23T09:10:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk'"
+        },
+        {
+          "purpose": "H1: federated check of subscriptions & plan_changes for acme-logistics",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT s.tenant_id, s.plan, s.tier, s.mrr_cents, s.contract_end, s.billing_model, COUNT(pc.change_id) AS price_change_count FROM billing.subscriptions s LEFT JOIN billing.plan_changes pc ON s.tenant_id = pc.tenant_id WHERE s.tenant_id = 'acme-logistics' GROUP BY s.tenant_id, s.plan, s.tier, s.mrr_cents, s.contract_end, s.billing_model"
+        },
+        {
+          "purpose": "H1: telemetry status check for acme-logistics",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 3,
+          "latency_ms": 34,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT http_status, error_code, COUNT(*) AS cnt FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND tenant = 'acme-logistics' GROUP BY http_status, error_code"
+        },
+        {
+          "purpose": "H2: measure earliest anomaly timestamp on /v1/orders/bulk",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 20,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T00:00:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H2: temporal precedence error split around 2026-10-23T03:30:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 29,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T03:30:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-23T03:30:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk'"
+        },
+        {
+          "purpose": "H2: cohort isolation test (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk')",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 26,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') THEN 1 ELSE 0 END) AS in_cohort_total, SUM(CASE WHEN (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS in_cohort_errors, SUM(CASE WHEN NOT (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') THEN 1 ELSE 0 END) AS out_cohort_total, SUM(CASE WHEN NOT (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS out_cohort_errors, AVG(CASE WHEN (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') THEN latency_ms END) AS in_cohort_avg_latency_ms, AVG(CASE WHEN NOT (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') THEN latency_ms END) AS out_cohort_avg_latency_ms FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk'"
+        },
+        {
+          "purpose": "H2: cross-silo row citations (telemetry <-> billing)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 6,
+          "latency_ms": 6,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT t.trace_id, t.correlation_id, t.http_status, t.error_code, t.latency_ms, b.event_id, b.tenant_id, b.amount_cents, b.failure_code FROM telemetry.api_traces t LEFT JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-23T02:01:00Z' AND t.ts_utc < '2026-10-23T09:30:00Z' AND t.endpoint = '/v1/orders/bulk' AND (service_version = '8.1.0' AND endpoint = '/v1/orders/bulk') AND t.http_status IN (422, 429, 504) ORDER BY t.ts_utc ASC LIMIT 6"
+        },
+        {
+          "purpose": "average enterprise bulk order value in billing silo",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 10,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS paid_orders, AVG(amount_cents) AS avg_order_cents FROM billing.checkout_events WHERE channel = 'api_bulk' AND status = 'paid'"
+        },
+        {
+          "purpose": "incident window enterprise bulk order revenue",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 7,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS paid_orders, COALESCE(SUM(amount_cents), 0) AS paid_cents FROM billing.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' AND channel = 'api_bulk' AND status = 'paid'"
+        },
+        {
+          "purpose": "enterprise 429 throttled calls by tenant",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 12,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT tenant, COUNT(*) AS throttled_calls FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status = 429 GROUP BY tenant ORDER BY throttled_calls DESC"
+        },
+        {
+          "purpose": "billing window breakdown",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 15,
+          "latency_ms": 30,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        },
+        {
+          "purpose": "H3: measure earliest anomaly timestamp on /v1/orders/bulk",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 16,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T00:00:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H3: temporal precedence error split around 2026-10-23T01:45:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 22,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T01:45:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-23T01:45:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk'"
+        },
+        {
+          "purpose": "H3: cohort isolation test (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk')",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 61,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') THEN 1 ELSE 0 END) AS in_cohort_total, SUM(CASE WHEN (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS in_cohort_errors, SUM(CASE WHEN NOT (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') THEN 1 ELSE 0 END) AS out_cohort_total, SUM(CASE WHEN NOT (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS out_cohort_errors, AVG(CASE WHEN (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') THEN latency_ms END) AS in_cohort_avg_latency_ms, AVG(CASE WHEN NOT (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') THEN latency_ms END) AS out_cohort_avg_latency_ms FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk'"
+        },
+        {
+          "purpose": "H3: cross-silo row citations (telemetry <-> billing)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 6,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT t.trace_id, t.correlation_id, t.http_status, t.error_code, t.latency_ms, b.event_id, b.tenant_id, b.amount_cents, b.failure_code FROM telemetry.api_traces t LEFT JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-23T02:01:00Z' AND t.ts_utc < '2026-10-23T09:30:00Z' AND t.endpoint = '/v1/orders/bulk' AND (tenant_tier = 'enterprise' AND endpoint = '/v1/orders/bulk') AND t.http_status IN (422, 429, 504) ORDER BY t.ts_utc ASC LIMIT 6"
+        },
+        {
+          "purpose": "average enterprise bulk order value in billing silo",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 16,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS paid_orders, AVG(amount_cents) AS avg_order_cents FROM billing.checkout_events WHERE channel = 'api_bulk' AND status = 'paid'"
+        },
+        {
+          "purpose": "incident window enterprise bulk order revenue",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 14,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS paid_orders, COALESCE(SUM(amount_cents), 0) AS paid_cents FROM billing.checkout_events WHERE created_at >= '2026-10-23T02:01:00Z' AND created_at < '2026-10-23T09:30:00Z' AND channel = 'api_bulk' AND status = 'paid'"
+        },
+        {
+          "purpose": "enterprise 429 throttled calls by tenant",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 21,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT tenant, COUNT(*) AS throttled_calls FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status = 429 GROUP BY tenant ORDER BY throttled_calls DESC"
+        },
+        {
+          "purpose": "Evaluator independent verification for H3 on /v1/orders/bulk",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 2,
+          "latency_ms": 22,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT http_status, error_code, COUNT(*) AS cnt FROM telemetry.api_traces WHERE ts_utc >= '2026-10-23T02:01:00Z' AND ts_utc < '2026-10-23T09:30:00Z' AND endpoint = '/v1/orders/bulk' AND http_status >= 400 GROUP BY http_status, error_code ORDER BY cnt DESC"
+        }
+      ]
+    },
+    "meterless": {
+      "world_model": {
+        "schema_version": "1.0.0",
+        "entity_count": 28,
+        "relation_count": 39,
+        "event_count": 6,
+        "entities": [
+          {
+            "id": "ent_f510a9a53320",
+            "name": "INC-8892",
+            "entity_type": "incident",
+            "description": "Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring (onset 2026-10-23T02:01:00Z): Why did enterprise tenant acme-logistics bulk order volume drop over 80% starting 2026-10-23T02:01:00Z? Support ticket tkt-7003 complains about 'new pricing' and threatens churn, while api-gateway v8.1.0 deployed at 03:15 UTC. Determine the true root cause and financial impact.",
+            "traits": {
+              "incident_id": "INC-8892",
+              "started_at": "2026-10-23T02:01:00Z",
+              "title": "Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring"
+            },
+            "tags": [
+              "INC-8892",
+              "incident"
+            ],
+            "continuity_anchor": "incident:INC-8892@2026-10-23T02:01:00Z",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.415Z",
+            "last_seen_at": "2026-10-26T11:48:17.415Z",
+            "source_silo": "alert",
+            "primary_keys": [
+              "INC-8892"
+            ],
+            "state": "active",
+            "confidence": 1.0,
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "ent_755619a48e91",
+            "name": "dep-1007",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1007: api-gateway v8.1.0 at 2026-10-23T03:30:00Z (Upgrade envoy 1.31; tune upstream connection pool)",
+            "traits": {
+              "deploy_id": "dep-1007",
+              "service": "api-gateway",
+              "version": "8.1.0",
+              "commit_sha": "0c6b87d",
+              "author": "infra-bot",
+              "deployed_at": "2026-10-23T03:30:00Z",
+              "summary": "Upgrade envoy 1.31; tune upstream connection pool"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1007",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.438Z",
+            "last_seen_at": "2026-10-26T11:48:17.438Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1007"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_07cab3bbd8ee",
+            "name": "dep-1008",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1008: checkout-service v3.4.3 at 2026-10-23T10:00:00Z (Order summary currency formatting)",
+            "traits": {
+              "deploy_id": "dep-1008",
+              "service": "checkout-service",
+              "version": "3.4.3",
+              "commit_sha": "f143f8d",
+              "author": "a.okafor",
+              "deployed_at": "2026-10-23T10:00:00Z",
+              "summary": "Order summary currency formatting"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1008",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.446Z",
+            "last_seen_at": "2026-10-26T11:48:17.446Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1008"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_1f9bc8b65c7d",
+            "name": "dep-1009",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1009: catalog-service v7.2.1 at 2026-10-23T15:20:00Z (Cache TTL tweak)",
+            "traits": {
+              "deploy_id": "dep-1009",
+              "service": "catalog-service",
+              "version": "7.2.1",
+              "commit_sha": "d2d81b1",
+              "author": "l.nguyen",
+              "deployed_at": "2026-10-23T15:20:00Z",
+              "summary": "Cache TTL tweak"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1009",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.454Z",
+            "last_seen_at": "2026-10-26T11:48:17.454Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1009"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_b168a5505188",
+            "name": "dep-1010",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1010: notification-service v2.8.2 at 2026-10-24T11:05:00Z (Email template fixes)",
+            "traits": {
+              "deploy_id": "dep-1010",
+              "service": "notification-service",
+              "version": "2.8.2",
+              "commit_sha": "3dd83f9",
+              "author": "s.patel",
+              "deployed_at": "2026-10-24T11:05:00Z",
+              "summary": "Email template fixes"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1010",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.462Z",
+            "last_seen_at": "2026-10-26T11:48:17.462Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1010"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_60114f819754",
+            "name": "dep-1011",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1011: tax-service v4.2.0 at 2026-10-24T17:55:00Z (Add EU VAT rounding rules (OSS scheme))",
+            "traits": {
+              "deploy_id": "dep-1011",
+              "service": "tax-service",
+              "version": "4.2.0",
+              "commit_sha": "3afe96c",
+              "author": "k.weber",
+              "deployed_at": "2026-10-24T17:55:00Z",
+              "summary": "Add EU VAT rounding rules (OSS scheme)"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1011",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.472Z",
+            "last_seen_at": "2026-10-26T11:48:17.472Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1011"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_fa9bfe9362d6",
+            "name": "dep-1012",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1012: search-service v5.0.4 at 2026-10-24T21:00:00Z (Synonym dictionary refresh)",
+            "traits": {
+              "deploy_id": "dep-1012",
+              "service": "search-service",
+              "version": "5.0.4",
+              "commit_sha": "3c0c1c9",
+              "author": "m.ruiz",
+              "deployed_at": "2026-10-24T21:00:00Z",
+              "summary": "Synonym dictionary refresh"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1012",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.482Z",
+            "last_seen_at": "2026-10-26T11:48:17.482Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1012"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_61561a1c52ff",
+            "name": "tkt-7003",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7003 (acme-logistics at 2026-10-23T09:10:00Z): Order sync failing - reconsidering plan",
+            "traits": {
+              "ticket_id": "tkt-7003",
+              "tenant": "acme-logistics",
+              "opened_at": "2026-10-23T09:10:00Z",
+              "subject": "Order sync failing - reconsidering plan",
+              "body": "Our nightly order sync has been failing since last night. Frankly we are also evaluating whether the new pricing is worth it for us.",
+              "priority": "urgent"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7003",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.498Z",
+            "last_seen_at": "2026-10-26T11:48:17.498Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7003"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_a3856a08f9e9",
+            "name": "tkt-7004",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7004 (nordic-goods at 2026-10-24T18:30:00Z): Checkout extremely slow in Germany",
+            "traits": {
+              "ticket_id": "tkt-7004",
+              "tenant": "nordic-goods",
+              "opened_at": "2026-10-24T18:30:00Z",
+              "subject": "Checkout extremely slow in Germany",
+              "body": "German customers wait 10+ seconds at checkout and many give up.",
+              "priority": "high"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7004",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.509Z",
+            "last_seen_at": "2026-10-26T11:48:17.509Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7004"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_3faeddc3007b",
+            "name": "flg-504",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-504: android_checkout_redesign rollout (50%) at 2026-10-23T00:30:00Z [platform=android]",
+            "traits": {
+              "change_id": "flg-504",
+              "flag_key": "android_checkout_redesign",
+              "changed_at": "2026-10-23T00:30:00Z",
+              "actor": "p.ade",
+              "action": "rollout",
+              "rollout_pct": 50,
+              "targeting": "platform=android"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-504",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.529Z",
+            "last_seen_at": "2026-10-26T11:48:17.529Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-504"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_79d6088b0810",
+            "name": "flg-505",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-505: new_tax_engine rollout (20%) at 2026-10-24T19:00:00Z [global]",
+            "traits": {
+              "change_id": "flg-505",
+              "flag_key": "new_tax_engine",
+              "changed_at": "2026-10-24T19:00:00Z",
+              "actor": "k.weber",
+              "action": "rollout",
+              "rollout_pct": 20,
+              "targeting": "global"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-505",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.541Z",
+            "last_seen_at": "2026-10-26T11:48:17.541Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-505"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_2f557977f8ac",
+            "name": "cfg-302",
+            "entity_type": "config_change",
+            "description": "Config cfg-302: api-gateway rate_limit.enterprise_burst_per_min 500->50 at 2026-10-23T01:45:00Z",
+            "traits": {
+              "change_id": "cfg-302",
+              "service": "api-gateway",
+              "config_key": "rate_limit.enterprise_burst_per_min",
+              "old_value": "500",
+              "new_value": "50",
+              "changed_at": "2026-10-23T01:45:00Z",
+              "actor": "infra-terraform",
+              "scope": "tier=enterprise"
+            },
+            "tags": [
+              "config_change",
+              "ops"
+            ],
+            "continuity_anchor": "ops:config_change:cfg-302",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.565Z",
+            "last_seen_at": "2026-10-26T11:48:17.565Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-302"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_195818ff4530",
+            "name": "cfg-303",
+            "entity_type": "config_change",
+            "description": "Config cfg-303: tax-service provider.retry_backoff_ms 200->100 at 2026-10-24T16:00:00Z",
+            "traits": {
+              "change_id": "cfg-303",
+              "service": "tax-service",
+              "config_key": "provider.retry_backoff_ms",
+              "old_value": "200",
+              "new_value": "100",
+              "changed_at": "2026-10-24T16:00:00Z",
+              "actor": "k.weber",
+              "scope": "region=us-east-1"
+            },
+            "tags": [
+              "config_change",
+              "ops"
+            ],
+            "continuity_anchor": "ops:config_change:cfg-303",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.582Z",
+            "last_seen_at": "2026-10-26T11:48:17.582Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-303"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_5da7245ae37b",
+            "name": "H1",
+            "entity_type": "hypothesis",
+            "description": "[FALSIFIED] Customer-side pullback due to recent plan price increase (ticket tkt-7003) \u2014 Support ticket tkt-7003 from acme-logistics cites dissatisfaction with 'new pricing'; hypothesis: a recent price hike in billing.plan_changes caused the tenant to throttle or halt bulk order sync.",
+            "traits": {
+              "id": "H1",
+              "title": "Customer-side pullback due to recent plan price increase (ticket tkt-7003)",
+              "category": "pricing_change",
+              "suspected_change_id": "tkt-7003",
+              "suspected_timestamp": "2026-10-23T09:10:00Z",
+              "target_silo": "billing",
+              "target_service": "subscriptions",
+              "target_cohort": {
+                "tenant": "acme-logistics"
+              },
+              "mechanism": "Support ticket tkt-7003 from acme-logistics cites dissatisfaction with 'new pricing'; hypothesis: a recent price hike in billing.plan_changes caused the tenant to throttle or halt bulk order sync.",
+              "status": "FALSIFIED",
+              "confidence": 0.04,
+              "proposed_by": "PlannerAgent",
+              "round_proposed": 1,
+              "round_resolved": 1,
+              "falsification_reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+              "checks": [
+                {
+                  "check_name": "contract_ledger_check",
+                  "passed": false,
+                  "summary": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+                  "observed": {
+                    "plan": "enterprise-annual",
+                    "contract_end": "2027-06-30",
+                    "price_change_count": 0,
+                    "http_429_count": 2768
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "tkt-7003",
+                    "acme-logistics"
+                  ]
+                }
+              ],
+              "evidence_stats": {
+                "observed_onset": "2026-10-23T02:00:01Z",
+                "errors_before_suspected_change": 2787,
+                "errors_after_suspected_change": 0,
+                "subscription_audit": {
+                  "tenant_id": "acme-logistics",
+                  "plan": "enterprise-annual",
+                  "tier": "enterprise",
+                  "mrr_cents": 2400000,
+                  "contract_end": "2027-06-30",
+                  "billing_model": "usage",
+                  "price_change_count": 0
+                },
+                "gateway_errors": [
+                  {
+                    "http_status": 200,
+                    "error_code": "",
+                    "cnt": 5177
+                  },
+                  {
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "cnt": 2768
+                  },
+                  {
+                    "http_status": 503,
+                    "error_code": "unavailable",
+                    "cnt": 17
+                  }
+                ],
+                "cited_ids": [
+                  "tkt-7003",
+                  "acme-logistics"
+                ]
+              },
+              "citations": [
+                "tkt-7003",
+                "acme-logistics"
+              ],
+              "world_entity_id": "ent_5da7245ae37b"
+            },
+            "tags": [
+              "falsified",
+              "hypothesis",
+              "pricing_change",
+              "testing"
+            ],
+            "continuity_anchor": "hypothesis:H1:tkt-7003",
+            "mention_count": 2,
+            "first_seen_at": "2026-10-26T11:48:17.604Z",
+            "last_seen_at": "2026-10-26T11:48:18.012Z",
+            "source_silo": "billing",
+            "primary_keys": [
+              "tkt-7003"
+            ],
+            "state": "falsified",
+            "confidence": 0.04,
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1"
+          },
+          {
+            "id": "ent_1c17d506d4f0",
+            "name": "H2",
+            "entity_type": "hypothesis",
+            "description": "[FALSIFIED] api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk \u2014 Deployment dep-1007 (Upgrade envoy 1.31; tune upstream connection pool) shipped at 2026-10-23T03:30:00Z and may have broken upstream connection pooling for /v1/orders/bulk.",
+            "traits": {
+              "id": "H2",
+              "title": "api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk",
+              "category": "deployment",
+              "suspected_change_id": "dep-1007",
+              "suspected_timestamp": "2026-10-23T03:30:00Z",
+              "target_silo": "ops",
+              "target_service": "api-gateway",
+              "target_cohort": {
+                "service": "api-gateway",
+                "service_version": "8.1.0"
+              },
+              "mechanism": "Deployment dep-1007 (Upgrade envoy 1.31; tune upstream connection pool) shipped at 2026-10-23T03:30:00Z and may have broken upstream connection pooling for /v1/orders/bulk.",
+              "status": "FALSIFIED",
+              "confidence": 0.04,
+              "proposed_by": "PlannerAgent",
+              "round_proposed": 1,
+              "round_resolved": 1,
+              "falsification_reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+              "checks": [
+                {
+                  "check_name": "temporal_precedence",
+                  "passed": false,
+                  "summary": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+                  "observed": {
+                    "incident_started_at": "2026-10-23T02:01:00Z",
+                    "suspected_change_at": "2026-10-23T03:30:00Z",
+                    "lag_after_onset_minutes": 89.0,
+                    "errors_before_change": 2038,
+                    "errors_after_change": 749
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "dep-1007",
+                    "tr-0018948",
+                    "tr-0018973",
+                    "tr-0018964",
+                    "tr-0018992"
+                  ]
+                }
+              ],
+              "evidence_stats": {
+                "observed_onset": "2026-10-23T02:00:01Z",
+                "errors_before_suspected_change": 2038,
+                "errors_after_suspected_change": 749,
+                "in_cohort_total": 2862,
+                "in_cohort_errors": 744,
+                "out_cohort_total": 6464,
+                "out_cohort_errors": 2024,
+                "in_cohort_avg_latency_ms": 139.3,
+                "out_cohort_avg_latency_ms": 129.9,
+                "sample_rows": [
+                  {
+                    "trace_id": "tr-0018948",
+                    "correlation_id": "ord-0015490",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0018973",
+                    "correlation_id": "ord-0015515",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0018964",
+                    "correlation_id": "ord-0015506",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0018992",
+                    "correlation_id": "ord-0015534",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0018993",
+                    "correlation_id": "ord-0015535",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0018990",
+                    "correlation_id": "ord-0015532",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  }
+                ],
+                "cited_ids": [
+                  "dep-1007",
+                  "tr-0018948",
+                  "tr-0018973",
+                  "tr-0018964",
+                  "tr-0018992"
+                ]
+              },
+              "citations": [
+                "dep-1007",
+                "tr-0018948",
+                "tr-0018973",
+                "tr-0018964",
+                "tr-0018992"
+              ],
+              "world_entity_id": "ent_1c17d506d4f0"
+            },
+            "tags": [
+              "deployment",
+              "falsified",
+              "hypothesis",
+              "testing"
+            ],
+            "continuity_anchor": "hypothesis:H2:dep-1007",
+            "mention_count": 2,
+            "first_seen_at": "2026-10-26T11:48:17.624Z",
+            "last_seen_at": "2026-10-26T11:48:18.044Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1007"
+            ],
+            "state": "falsified",
+            "confidence": 0.04,
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1"
+          },
+          {
+            "id": "ent_4c94eb64811b",
+            "name": "tr-0018948",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018948\", \"correlation_id\": \"ord-0015490\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018948",
+              "correlation_id": "ord-0015490",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018948",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.920Z",
+            "last_seen_at": "2026-10-26T11:48:17.920Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018948"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_4c42a719aa34",
+            "name": "tr-0018973",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018973\", \"correlation_id\": \"ord-0015515\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018973",
+              "correlation_id": "ord-0015515",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018973",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.927Z",
+            "last_seen_at": "2026-10-26T11:48:17.927Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018973"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_db3826fec7a4",
+            "name": "tr-0018964",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018964\", \"correlation_id\": \"ord-0015506\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018964",
+              "correlation_id": "ord-0015506",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018964",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.939Z",
+            "last_seen_at": "2026-10-26T11:48:17.939Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018964"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_5f8401db5efa",
+            "name": "tr-0018992",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018992\", \"correlation_id\": \"ord-0015534\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018992",
+              "correlation_id": "ord-0015534",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018992",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.947Z",
+            "last_seen_at": "2026-10-26T11:48:17.947Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018992"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_0985478840be",
+            "name": "tr-0018993",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018993\", \"correlation_id\": \"ord-0015535\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018993",
+              "correlation_id": "ord-0015535",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018993",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.955Z",
+            "last_seen_at": "2026-10-26T11:48:17.955Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018993"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_543cefb12c24",
+            "name": "tr-0018990",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0018990\", \"correlation_id\": \"ord-0015532\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0018990",
+              "correlation_id": "ord-0015532",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0018990",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:17.965Z",
+            "last_seen_at": "2026-10-26T11:48:17.965Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0018990"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_1_H2"
+          },
+          {
+            "id": "ent_e0d76e0a9111",
+            "name": "H3",
+            "entity_type": "hypothesis",
+            "description": "[VERIFIED] Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling \u2014 Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+            "traits": {
+              "id": "H3",
+              "title": "Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling",
+              "category": "config_change",
+              "suspected_change_id": "cfg-302",
+              "suspected_timestamp": "2026-10-23T01:45:00Z",
+              "target_silo": "ops+telemetry+billing",
+              "target_service": "api-gateway",
+              "target_cohort": {
+                "tenant_tier": "enterprise",
+                "endpoint": "/v1/orders/bulk",
+                "http_status": 429
+              },
+              "mechanism": "Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+              "status": "VERIFIED",
+              "confidence": 0.96,
+              "proposed_by": "PlannerAgent",
+              "round_proposed": 2,
+              "round_resolved": 2,
+              "falsification_reason": null,
+              "checks": [
+                {
+                  "check_name": "temporal_precedence",
+                  "passed": true,
+                  "summary": "Temporal Precedence Passed: cfg-302 (2026-10-23T01:45:00Z) occurred 16 minute(s) before or at anomaly onset (2026-10-23T02:01:00Z).",
+                  "observed": {
+                    "incident_started_at": "2026-10-23T02:01:00Z",
+                    "suspected_change_at": "2026-10-23T01:45:00Z",
+                    "lead_time_minutes": 16.0
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "cfg-302",
+                    "tr-0011642",
+                    "tr-0011669",
+                    "tr-0011687",
+                    "tr-0011700"
+                  ]
+                },
+                {
+                  "check_name": "cohort_isolation",
+                  "passed": true,
+                  "summary": "Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00.",
+                  "observed": {
+                    "in_cohort_errors": 2768,
+                    "in_cohort_total": 9326,
+                    "in_cohort_error_rate": 0.2968,
+                    "out_cohort_errors": 0,
+                    "out_cohort_total": 0,
+                    "out_cohort_error_rate": 0.0,
+                    "in_cohort_avg_latency_ms": 132.8,
+                    "out_cohort_avg_latency_ms": 0.0
+                  },
+                  "p_value": 1.0,
+                  "z_score": 0.0,
+                  "risk_ratio": 593.61,
+                  "cited_ids": [
+                    "cfg-302",
+                    "tr-0011642",
+                    "tr-0011669",
+                    "tr-0011687",
+                    "tr-0011700"
+                  ]
+                },
+                {
+                  "check_name": "citation_enforcement",
+                  "passed": true,
+                  "summary": "Cross-Silo Citation Check Passed: 5 primary-key citations linked across ops, telemetry, and billing silos (cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700).",
+                  "observed": {
+                    "citation_count": 5,
+                    "citations": [
+                      "cfg-302",
+                      "tr-0011642",
+                      "tr-0011669",
+                      "tr-0011687",
+                      "tr-0011700"
+                    ]
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "cfg-302",
+                    "tr-0011642",
+                    "tr-0011669",
+                    "tr-0011687",
+                    "tr-0011700"
+                  ]
+                },
+                {
+                  "check_name": "evaluator_independent_sql_check",
+                  "passed": true,
+                  "summary": "Independent Evaluator SQL confirmed 2768 error traces with HTTP 429 (rate_limited) on /v1/orders/bulk",
+                  "observed": {
+                    "breakdown": [
+                      {
+                        "http_status": 429,
+                        "error_code": "rate_limited",
+                        "cnt": 2768
+                      },
+                      {
+                        "http_status": 503,
+                        "error_code": "unavailable",
+                        "cnt": 19
+                      }
+                    ]
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "cfg-302",
+                    "tr-0011642",
+                    "tr-0011669",
+                    "tr-0011687"
+                  ]
+                }
+              ],
+              "evidence_stats": {
+                "observed_onset": "2026-10-23T02:00:01Z",
+                "errors_before_suspected_change": 0,
+                "errors_after_suspected_change": 2787,
+                "in_cohort_total": 9326,
+                "in_cohort_errors": 2768,
+                "out_cohort_total": 0,
+                "out_cohort_errors": 0,
+                "in_cohort_avg_latency_ms": 132.8,
+                "out_cohort_avg_latency_ms": 0.0,
+                "sample_rows": [
+                  {
+                    "trace_id": "tr-0011642",
+                    "correlation_id": "ord-0008582",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0011669",
+                    "correlation_id": "ord-0008609",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0011687",
+                    "correlation_id": "ord-0008627",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0011700",
+                    "correlation_id": "ord-0008640",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0011683",
+                    "correlation_id": "ord-0008623",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  },
+                  {
+                    "trace_id": "tr-0011688",
+                    "correlation_id": "ord-0008628",
+                    "http_status": 429,
+                    "error_code": "rate_limited",
+                    "latency_ms": 3,
+                    "event_id": null,
+                    "tenant_id": null,
+                    "amount_cents": null,
+                    "failure_code": null
+                  }
+                ],
+                "cited_ids": [
+                  "cfg-302",
+                  "tr-0011642",
+                  "tr-0011669",
+                  "tr-0011687",
+                  "tr-0011700"
+                ]
+              },
+              "citations": [
+                "cfg-302",
+                "tr-0011642",
+                "tr-0011669",
+                "tr-0011687",
+                "tr-0011700"
+              ],
+              "world_entity_id": "ent_e0d76e0a9111"
+            },
+            "tags": [
+              "config_change",
+              "hypothesis",
+              "testing",
+              "verified"
+            ],
+            "continuity_anchor": "hypothesis:H3:cfg-302",
+            "mention_count": 2,
+            "first_seen_at": "2026-10-26T11:48:18.114Z",
+            "last_seen_at": "2026-10-26T11:48:18.545Z",
+            "source_silo": "ops+telemetry+billing",
+            "primary_keys": [
+              "cfg-302"
+            ],
+            "state": "verified",
+            "confidence": 0.96,
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_2"
+          },
+          {
+            "id": "ent_e72605edfe3d",
+            "name": "tr-0011642",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0011642\", \"correlation_id\": \"ord-0008582\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0011642",
+              "correlation_id": "ord-0008582",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0011642",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:18.275Z",
+            "last_seen_at": "2026-10-26T11:48:18.275Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0011642"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_2_H3"
+          },
+          {
+            "id": "ent_0d63822203e7",
+            "name": "tr-0011669",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0011669\", \"correlation_id\": \"ord-0008609\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0011669",
+              "correlation_id": "ord-0008609",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0011669",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:18.318Z",
+            "last_seen_at": "2026-10-26T11:48:18.318Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0011669"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_2_H3"
+          },
+          {
+            "id": "ent_613d30f2c2bc",
+            "name": "tr-0011687",
+            "entity_type": "telemetry_trace",
+            "description": "{\"trace_id\": \"tr-0011687\", \"correlation_id\": \"ord-0008627\", \"http_status\": 429, \"error_code\": \"rate_limited\", \"latency_ms\": 3, \"event_id\": null, \"tenant_id\": null, \"amount_cents\": ",
+            "traits": {
+              "trace_id": "tr-0011687",
+              "correlation_id": "ord-0008627",
+              "http_status": 429,
+              "error_code": "rate_limited",
+              "latency_ms": 3,
+              "event_id": null,
+              "tenant_id": null,
+              "amount_cents": null,
+              "failure_code": null
+            },
+            "tags": [
+              "telemetry",
+              "telemetry_trace"
+            ],
+            "continuity_anchor": "telemetry:telemetry_trace:tr-0011687",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:18.336Z",
+            "last_seen_at": "2026-10-26T11:48:18.336Z",
+            "source_silo": "telemetry",
+            "primary_keys": [
+              "tr-0011687"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": "round_2_H3"
+          }
+        ],
+        "relations": [
+          {
+            "id": "edg_cf82126dd210",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_755619a48e91",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.442Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_56161af93d5b",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_07cab3bbd8ee",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.451Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_9db9eb29da0c",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_1f9bc8b65c7d",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.458Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_d81f095b54bb",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_b168a5505188",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.467Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_dfb3957697cd",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_60114f819754",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.477Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_a101255b02f7",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_fa9bfe9362d6",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.487Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_0b10f751a982",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_61561a1c52ff",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.504Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_a588f18ef8fe",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_a3856a08f9e9",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.515Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_94662f931e5d",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_3faeddc3007b",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.536Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_5843caf2abbf",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_79d6088b0810",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.547Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_491cf51ca2f1",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_2f557977f8ac",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_config_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.574Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_6faec72eef9c",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_195818ff4530",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_config_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.590Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_b02e0a8e83d7",
+            "from_id": "ent_5da7245ae37b",
+            "to_id": "ent_f510a9a53320",
+            "edge_type": "investigates",
+            "properties": {
+              "category": "pricing_change",
+              "round": 1
+            },
+            "confidence": 0.04,
+            "created_at": "2026-10-26T11:48:18.017Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_531f1e20af4b",
+            "from_id": "ent_1c17d506d4f0",
+            "to_id": "ent_f510a9a53320",
+            "edge_type": "investigates",
+            "properties": {
+              "category": "deployment",
+              "round": 1
+            },
+            "confidence": 0.04,
+            "created_at": "2026-10-26T11:48:18.052Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_b8a477eaefc6",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_4c94eb64811b",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.924Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_57f99dd2a897",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_4c42a719aa34",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.935Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_8328374801ce",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_db3826fec7a4",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.942Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_e6d5b7d6b55c",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_5f8401db5efa",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.951Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_cb838a6ab835",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_0985478840be",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.959Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_2ae03b5a2164",
+            "from_id": "ent_f510a9a53320",
+            "to_id": "ent_543cefb12c24",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H2_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:17.969Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_b119950fb9be",
+            "from_id": "ent_5da7245ae37b",
+            "to_id": "ent_cc62fbce9fbf",
+            "edge_type": "falsified_by",
+            "properties": {
+              "reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+              "cited_id": "tkt-7003"
+            },
+            "confidence": 0.98,
+            "created_at": "2026-10-26T11:48:18.023Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_36ef52a28381",
+            "from_id": "ent_5da7245ae37b",
+            "to_id": "ent_d8f7cebdd52a",
+            "edge_type": "falsified_by",
+            "properties": {
+              "reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+              "cited_id": "acme-logistics"
+            },
+            "confidence": 0.98,
+            "created_at": "2026-10-26T11:48:18.031Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_09730ab53f88",
+            "from_id": "ent_1c17d506d4f0",
+            "to_id": "ent_0f9cd9dd0ef0",
+            "edge_type": "falsified_by",
+            "properties": {
+              "reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+              "cited_id": "dep-1007"
+            },
+            "confidence": 0.98,
+            "created_at": "2026-10-26T11:48:18.057Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_531a0b2ee91d",
+            "from_id": "ent_1c17d506d4f0",
+            "to_id": "ent_571e5a1f8e12",
+            "edge_type": "falsified_by",
+            "properties": {
+              "reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+              "cited_id": "tr-0018948"
+            },
+            "confidence": 0.98,
+            "created_at": "2026-10-26T11:48:18.063Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          },
+          {
+            "id": "edg_0f9ab764b738",
+            "from_id": "ent_1c17d506d4f0",
+            "to_id": "ent_7e36ab0bd91c",
+            "edge_type": "falsified_by",
+            "properties": {
+              "reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+              "cited_id": "tr-0018973"
+            },
+            "confidence": 0.98,
+            "created_at": "2026-10-26T11:48:18.070Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892"
+          }
+        ],
+        "events": [
+          {
+            "snapshot_index": 0,
+            "timestamp": "2026-10-26T11:48:17.492Z",
+            "run_id": "INC-8892",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_deployments",
+            "entity_ids": [
+              "ent_755619a48e91",
+              "ent_07cab3bbd8ee",
+              "ent_1f9bc8b65c7d",
+              "ent_b168a5505188",
+              "ent_60114f819754",
+              "ent_fa9bfe9362d6"
+            ],
+            "summary": "Ingested 6 grounded records from ops (round1_deployments)"
+          },
+          {
+            "snapshot_index": 1,
+            "timestamp": "2026-10-26T11:48:17.522Z",
+            "run_id": "INC-8892",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_support_tickets",
+            "entity_ids": [
+              "ent_61561a1c52ff",
+              "ent_a3856a08f9e9"
+            ],
+            "summary": "Ingested 2 grounded records from ops (round1_support_tickets)"
+          },
+          {
+            "snapshot_index": 2,
+            "timestamp": "2026-10-26T11:48:17.557Z",
+            "run_id": "INC-8892",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_flag_changes",
+            "entity_ids": [
+              "ent_3faeddc3007b",
+              "ent_79d6088b0810"
+            ],
+            "summary": "Ingested 2 grounded records from ops (round1_flag_changes)"
+          },
+          {
+            "snapshot_index": 3,
+            "timestamp": "2026-10-26T11:48:17.596Z",
+            "run_id": "INC-8892",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_config_changes",
+            "entity_ids": [
+              "ent_2f557977f8ac",
+              "ent_195818ff4530"
+            ],
+            "summary": "Ingested 2 grounded records from ops (round1_config_changes)"
+          },
+          {
+            "snapshot_index": 4,
+            "timestamp": "2026-10-26T11:48:17.974Z",
+            "run_id": "INC-8892",
+            "agent_id": "ExecutorAgent",
+            "label": "ingest:telemetry:H2_sample_citations",
+            "entity_ids": [
+              "ent_4c94eb64811b",
+              "ent_4c42a719aa34",
+              "ent_db3826fec7a4",
+              "ent_5f8401db5efa",
+              "ent_0985478840be",
+              "ent_543cefb12c24"
+            ],
+            "summary": "Ingested 6 grounded records from telemetry (H2_sample_citations)"
+          },
+          {
+            "snapshot_index": 5,
+            "timestamp": "2026-10-26T11:48:18.447Z",
+            "run_id": "INC-8892",
+            "agent_id": "ExecutorAgent",
+            "label": "ingest:telemetry:H3_sample_citations",
+            "entity_ids": [
+              "ent_e72605edfe3d",
+              "ent_0d63822203e7",
+              "ent_613d30f2c2bc",
+              "ent_b0a11e9c5018",
+              "ent_84e55d88c280",
+              "ent_610c2b3f7053"
+            ],
+            "summary": "Ingested 6 grounded records from telemetry (H3_sample_citations)"
+          }
+        ],
+        "persisted_path": "meterless_world_model.json"
+      },
+      "hmem": {
+        "schema_version": "1.0.0",
+        "memory_count": 15,
+        "by_type": {
+          "factual": 5,
+          "procedural": 1,
+          "falsification": 6,
+          "invariant": 3
+        },
+        "by_layer": {
+          "short_term": 0,
+          "working": 5,
+          "long_term": 10
+        },
+        "conflicts_resolved": [],
+        "trust_profiles": {
+          "MemoryStoreService": {
+            "events": 1,
+            "last_action": "hydrate_warm_start"
+          },
+          "Orchestrator": {
+            "events": 1,
+            "last_action": "memory_added"
+          },
+          "PlannerAgent": {
+            "events": 2,
+            "last_action": "reinjection_retrieve"
+          },
+          "ExecutorAgent": {
+            "events": 4,
+            "last_action": "reinjection_retrieve"
+          },
+          "EvaluatorAgent": {
+            "events": 8,
+            "last_action": "memory_promoted"
+          },
+          "SynthesizerAgent": {
+            "events": 1,
+            "last_action": "reinjection_retrieve"
+          }
+        },
+        "memories": [
+          {
+            "id": "mem_3365db6c42e3",
+            "content": "Incident INC-8891 opened with onset 2026-10-22T14:05:00Z: Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:16.205Z",
+            "last_accessed": "2026-10-26T11:48:17.081Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_96f0967772db",
+            "content": "Schema mapping learned for {billing}.checkout_events: column repairs {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'}",
+            "memory_type": "procedural",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.718Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 7,
+            "tags": [
+              "billing",
+              "checkout_events",
+              "schema",
+              "sql_schema_repaired"
+            ],
+            "confidence": 0.99,
+            "source": "event:sql_schema_repaired",
+            "domain": "incident_investigation",
+            "namespace": "tooling/zetaris_schema",
+            "entities": [
+              "billing.checkout_events"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_31531c2289ee",
+            "content": "FALSIFIED H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm): Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause. [citations: dep-1005, tr-0008060, evt-0006224, tr-0008076, evt-0006232, tr-0008080, evt-0006234, tr-0008082, evt-0006235]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.877Z",
+            "last_accessed": "2026-10-26T11:48:18.112Z",
+            "access_count": 7,
+            "tags": [
+              "dep-1005",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "dep-1005",
+              "evt-0006224",
+              "evt-0006232",
+              "evt-0006234",
+              "evt-0006235",
+              "tr-0008060",
+              "tr-0008076",
+              "tr-0008080",
+              "tr-0008082"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_55343e69844c",
+            "content": "FALSIFIED H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts): Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301. [citations: cfg-301]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.902Z",
+            "last_accessed": "2026-10-26T11:48:18.010Z",
+            "access_count": 6,
+            "tags": [
+              "cfg-301",
+              "config_change",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "cfg-301"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_01e9e5c8f206",
+            "content": "VERIFIED ROOT CAUSE H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422): All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. [citations: flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120, tr-0007872, evt-0006130, tr-0007876, evt-0006132]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.323Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 7,
+            "tags": [
+              "feature_flag",
+              "flg-502",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0006119",
+              "evt-0006120",
+              "evt-0006130",
+              "evt-0006132",
+              "flg-502",
+              "tr-0007850",
+              "tr-0007852",
+              "tr-0007872",
+              "tr-0007876"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_43bb2e8e3158",
+            "content": "Incident INC-8891 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:49.829Z",
+            "last_accessed": "2026-10-26T11:48:16.934Z",
+            "access_count": 16,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_5bde4ba8f643",
+            "content": "FALSIFIED H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003)): Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn. [citations: tkt-7003, acme-logistics]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.036Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 6,
+            "tags": [
+              "falsified",
+              "hypothesis_falsified",
+              "pricing_change",
+              "tkt-7003"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "acme-logistics",
+              "tkt-7003"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_34315b8bcfc9",
+            "content": "FALSIFIED H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk): Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause. [citations: dep-1007, tr-0018948, tr-0018973, tr-0018964, tr-0018992]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.098Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 6,
+            "tags": [
+              "dep-1007",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1007",
+              "tr-0018948",
+              "tr-0018964",
+              "tr-0018973",
+              "tr-0018992"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_1fbd40b60d96",
+            "content": "VERIFIED ROOT CAUSE H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling): All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. [citations: cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.645Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 3,
+            "tags": [
+              "cfg-302",
+              "config_change",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_a0ee8d017a2c",
+            "content": "Incident INC-8891 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:50.644Z",
+            "last_accessed": "2026-10-26T11:48:16.213Z",
+            "access_count": 11,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_e09fa3b3273a",
+            "content": "FALSIFIED H1 (new_tax_engine feature-flag rollout (flg-505) caused checkout tax timeouts): Temporal Precedence Violation: suspected change flg-505 occurred at 2026-10-24T19:00:00Z, which is 48 minutes AFTER the anomaly started at 2026-10-24T18:12:00Z (150 error traces were already recorded before 2026-10-24T19:00:00Z). An effect cannot precede its cause. [citations: flg-505, tr-0032403, evt-0025310, tr-0032404, tr-0032756, evt-0025626, tr-0032757]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.839Z",
+            "last_accessed": "2026-10-26T11:48:18.112Z",
+            "access_count": 6,
+            "tags": [
+              "falsified",
+              "feature_flag",
+              "flg-505",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "evt-0025310",
+              "evt-0025626",
+              "flg-505",
+              "tr-0032403",
+              "tr-0032404",
+              "tr-0032756",
+              "tr-0032757"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_438dc5ddaff3",
+            "content": "FALSIFIED H2 (Global code bug in tax-service v4.2.0 deployment (dep-1011) broke all tax calculations): Cohort Isolation Falsification: inside predicted cohort ({'service': 'tax-service', 'service_version': '4.2.0', 'scope': 'global'}) error rate is 0.00% (0/349), whereas outside cohort error rate is 61.30% (388/633). The anomaly is NOT isolated to dep-1011. [citations: dep-1011]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.865Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "dep-1011",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1011"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_30f3a601bf5b",
+            "content": "VERIFIED ROOT CAUSE H3 (Third-party upstream provider taxly-eu 504 timeout degradation in eu-west-1 amplified by 3x retry loop): All falsification checks passed for H3 (upstream-taxly-eu-504): Cohort Isolation Verified: in-cohort failure rate = 76.1% (388/510) vs out-of-cohort = 0.00% (0/472), risk_ratio = 1521.57x, z = 24.36, p = 4.03e-131. [citations: upstream-taxly-eu-504, tr-0031723, evt-0025013, tr-0031724, tr-0031729, evt-0025015, tr-0031734, evt-0025017]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:51.135Z",
+            "last_accessed": "2026-10-26T11:48:17.648Z",
+            "access_count": 4,
+            "tags": [
+              "hypothesis_verified",
+              "root_cause",
+              "upstream-taxly-eu-504",
+              "upstream_provider",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0025013",
+              "evt-0025015",
+              "evt-0025017",
+              "tr-0031723",
+              "tr-0031724",
+              "tr-0031729",
+              "tr-0031734",
+              "upstream-taxly-eu-504"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_bd4d121739dd",
+            "content": "Incident INC-8892 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:17.419Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 8,
+            "tags": [
+              "INC-8892",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8892"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_69c47e5e7e12",
+            "content": "Incident INC-8893 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:50.205Z",
+            "last_accessed": "2026-10-26T11:38:50.620Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8893",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8893"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8893",
+            "task_id": ""
+          }
+        ],
+        "persisted_path": "meterless_hmem.json"
+      },
+      "context_builder_manifest": {
+        "wired_services": [
+          "select_entities_by_state",
+          "select_continuity_anchors",
+          "falsification_graph_projection",
+          "cross_silo_citation_index"
+        ],
+        "wired_helpers": [
+          "select_entities_by_state",
+          "select_continuity_anchors",
+          "falsification_graph_projection",
+          "cross_silo_citation_index"
+        ],
+        "dormant_helpers": [
+          "vector_centroid_similarity",
+          "multimodal_vision_anchor"
+        ]
+      },
+      "world_model_health": {
+        "schema_version": "1.0.0",
+        "entity_count": 28,
+        "edge_count": 39,
+        "snapshot_count": 6,
+        "pipeline_runs": 6,
+        "orphan_entity_count": 0,
+        "wired_vs_helper_manifest": {
+          "wired_helpers": [
+            "select_entities_by_state",
+            "select_continuity_anchors",
+            "falsification_graph_projection",
+            "cross_silo_citation_index"
+          ],
+          "dormant_helpers": [
+            "vector_centroid_similarity",
+            "multimodal_vision_anchor"
+          ]
+        }
+      },
+      "hmem_stats": {
+        "schema_version": "1.0.0",
+        "memory_count": 15,
+        "by_type": {
+          "factual": 5,
+          "procedural": 1,
+          "falsification": 6,
+          "invariant": 3
+        },
+        "by_layer": {
+          "short_term": 0,
+          "working": 5,
+          "long_term": 10
+        },
+        "conflicts_resolved": [],
+        "trust_profiles": {
+          "MemoryStoreService": {
+            "events": 1,
+            "last_action": "hydrate_warm_start"
+          },
+          "Orchestrator": {
+            "events": 1,
+            "last_action": "memory_added"
+          },
+          "PlannerAgent": {
+            "events": 2,
+            "last_action": "reinjection_retrieve"
+          },
+          "ExecutorAgent": {
+            "events": 4,
+            "last_action": "reinjection_retrieve"
+          },
+          "EvaluatorAgent": {
+            "events": 8,
+            "last_action": "memory_promoted"
+          },
+          "SynthesizerAgent": {
+            "events": 1,
+            "last_action": "reinjection_retrieve"
+          }
+        },
+        "memories": [
+          {
+            "id": "mem_3365db6c42e3",
+            "content": "Incident INC-8891 opened with onset 2026-10-22T14:05:00Z: Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:16.205Z",
+            "last_accessed": "2026-10-26T11:48:17.081Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_96f0967772db",
+            "content": "Schema mapping learned for {billing}.checkout_events: column repairs {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'}",
+            "memory_type": "procedural",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.718Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 7,
+            "tags": [
+              "billing",
+              "checkout_events",
+              "schema",
+              "sql_schema_repaired"
+            ],
+            "confidence": 0.99,
+            "source": "event:sql_schema_repaired",
+            "domain": "incident_investigation",
+            "namespace": "tooling/zetaris_schema",
+            "entities": [
+              "billing.checkout_events"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_31531c2289ee",
+            "content": "FALSIFIED H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm): Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause. [citations: dep-1005, tr-0008060, evt-0006224, tr-0008076, evt-0006232, tr-0008080, evt-0006234, tr-0008082, evt-0006235]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.877Z",
+            "last_accessed": "2026-10-26T11:48:18.112Z",
+            "access_count": 7,
+            "tags": [
+              "dep-1005",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "dep-1005",
+              "evt-0006224",
+              "evt-0006232",
+              "evt-0006234",
+              "evt-0006235",
+              "tr-0008060",
+              "tr-0008076",
+              "tr-0008080",
+              "tr-0008082"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_55343e69844c",
+            "content": "FALSIFIED H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts): Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301. [citations: cfg-301]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.902Z",
+            "last_accessed": "2026-10-26T11:48:18.010Z",
+            "access_count": 6,
+            "tags": [
+              "cfg-301",
+              "config_change",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "cfg-301"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_01e9e5c8f206",
+            "content": "VERIFIED ROOT CAUSE H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422): All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. [citations: flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120, tr-0007872, evt-0006130, tr-0007876, evt-0006132]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.323Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 7,
+            "tags": [
+              "feature_flag",
+              "flg-502",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0006119",
+              "evt-0006120",
+              "evt-0006130",
+              "evt-0006132",
+              "flg-502",
+              "tr-0007850",
+              "tr-0007852",
+              "tr-0007872",
+              "tr-0007876"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_43bb2e8e3158",
+            "content": "Incident INC-8891 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:49.829Z",
+            "last_accessed": "2026-10-26T11:48:16.934Z",
+            "access_count": 16,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_5bde4ba8f643",
+            "content": "FALSIFIED H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003)): Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn. [citations: tkt-7003, acme-logistics]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.036Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 6,
+            "tags": [
+              "falsified",
+              "hypothesis_falsified",
+              "pricing_change",
+              "tkt-7003"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "acme-logistics",
+              "tkt-7003"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_34315b8bcfc9",
+            "content": "FALSIFIED H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk): Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause. [citations: dep-1007, tr-0018948, tr-0018973, tr-0018964, tr-0018992]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.098Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 6,
+            "tags": [
+              "dep-1007",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1007",
+              "tr-0018948",
+              "tr-0018964",
+              "tr-0018973",
+              "tr-0018992"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_1fbd40b60d96",
+            "content": "VERIFIED ROOT CAUSE H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling): All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. [citations: cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:18.645Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 3,
+            "tags": [
+              "cfg-302",
+              "config_change",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_a0ee8d017a2c",
+            "content": "Incident INC-8891 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:50.644Z",
+            "last_accessed": "2026-10-26T11:48:16.213Z",
+            "access_count": 11,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_e09fa3b3273a",
+            "content": "FALSIFIED H1 (new_tax_engine feature-flag rollout (flg-505) caused checkout tax timeouts): Temporal Precedence Violation: suspected change flg-505 occurred at 2026-10-24T19:00:00Z, which is 48 minutes AFTER the anomaly started at 2026-10-24T18:12:00Z (150 error traces were already recorded before 2026-10-24T19:00:00Z). An effect cannot precede its cause. [citations: flg-505, tr-0032403, evt-0025310, tr-0032404, tr-0032756, evt-0025626, tr-0032757]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.839Z",
+            "last_accessed": "2026-10-26T11:48:18.112Z",
+            "access_count": 6,
+            "tags": [
+              "falsified",
+              "feature_flag",
+              "flg-505",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "evt-0025310",
+              "evt-0025626",
+              "flg-505",
+              "tr-0032403",
+              "tr-0032404",
+              "tr-0032756",
+              "tr-0032757"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_438dc5ddaff3",
+            "content": "FALSIFIED H2 (Global code bug in tax-service v4.2.0 deployment (dep-1011) broke all tax calculations): Cohort Isolation Falsification: inside predicted cohort ({'service': 'tax-service', 'service_version': '4.2.0', 'scope': 'global'}) error rate is 0.00% (0/349), whereas outside cohort error rate is 61.30% (388/633). The anomaly is NOT isolated to dep-1011. [citations: dep-1011]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.865Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "dep-1011",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1011"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_30f3a601bf5b",
+            "content": "VERIFIED ROOT CAUSE H3 (Third-party upstream provider taxly-eu 504 timeout degradation in eu-west-1 amplified by 3x retry loop): All falsification checks passed for H3 (upstream-taxly-eu-504): Cohort Isolation Verified: in-cohort failure rate = 76.1% (388/510) vs out-of-cohort = 0.00% (0/472), risk_ratio = 1521.57x, z = 24.36, p = 4.03e-131. [citations: upstream-taxly-eu-504, tr-0031723, evt-0025013, tr-0031724, tr-0031729, evt-0025015, tr-0031734, evt-0025017]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:51.135Z",
+            "last_accessed": "2026-10-26T11:48:17.648Z",
+            "access_count": 4,
+            "tags": [
+              "hypothesis_verified",
+              "root_cause",
+              "upstream-taxly-eu-504",
+              "upstream_provider",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0025013",
+              "evt-0025015",
+              "evt-0025017",
+              "tr-0031723",
+              "tr-0031724",
+              "tr-0031729",
+              "tr-0031734",
+              "upstream-taxly-eu-504"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_bd4d121739dd",
+            "content": "Incident INC-8892 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:17.419Z",
+            "last_accessed": "2026-10-26T11:48:18.658Z",
+            "access_count": 8,
+            "tags": [
+              "INC-8892",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8892"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_69c47e5e7e12",
+            "content": "Incident INC-8893 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:50.205Z",
+            "last_accessed": "2026-10-26T11:38:50.620Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8893",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8893"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8893",
+            "task_id": ""
+          }
+        ],
+        "persisted_path": "meterless_hmem.json"
+      },
+      "world_model_log_file": "world_model-INC-8892.jsonl"
+    },
+    "nvidia_nemotron": {
+      "reasoning_lane_model": "nvidia/llama-3.3-nemotron-super-49b-v1",
+      "fast_lane_model": "nvidia/nvidia-nemotron-nano-9b-v2",
+      "live_api_configured": false,
+      "calls": []
+    },
+    "cursor": {
+      "role": "Primary AI development environment used for multi-agent architecture, SQL federation adapter, and test suite"
+    }
+  },
+  "alert": {
+    "incident_id": "INC-8892",
+    "title": "Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+    "metric": "enterprise_order_sync_drop",
+    "started_at": "2026-10-23T02:01:00Z",
+    "ended_at": "2026-10-23T09:30:00Z",
+    "baseline_start": "2026-10-22T02:00:00Z",
+    "baseline_end": "2026-10-22T09:30:00Z",
+    "symptom_summary": "Why did enterprise tenant acme-logistics bulk order volume drop over 80% starting 2026-10-23T02:01:00Z? Support ticket tkt-7003 complains about 'new pricing' and threatens churn, while api-gateway v8.1.0 deployed at 03:15 UTC. Determine the true root cause and financial impact.",
+    "scenario_key": "scenario_02_rate_limit_churn",
+    "tenant_hint": "acme-logistics",
+    "region_hint": null,
+    "endpoint_hint": "/v1/orders/bulk",
+    "inject_sql_mismatch": true
+  },
+  "rounds_completed": 2,
+  "hypotheses": [
+    {
+      "id": "H1",
+      "title": "Customer-side pullback due to recent plan price increase (ticket tkt-7003)",
+      "category": "pricing_change",
+      "suspected_change_id": "tkt-7003",
+      "suspected_timestamp": "2026-10-23T09:10:00Z",
+      "target_silo": "billing",
+      "target_service": "subscriptions",
+      "target_cohort": {
+        "tenant": "acme-logistics"
+      },
+      "mechanism": "Support ticket tkt-7003 from acme-logistics cites dissatisfaction with 'new pricing'; hypothesis: a recent price hike in billing.plan_changes caused the tenant to throttle or halt bulk order sync.",
+      "status": "FALSIFIED",
+      "confidence": 0.04,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 1,
+      "round_resolved": 1,
+      "falsification_reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+      "checks": [
+        {
+          "check_name": "contract_ledger_check",
+          "passed": false,
+          "summary": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+          "observed": {
+            "plan": "enterprise-annual",
+            "contract_end": "2027-06-30",
+            "price_change_count": 0,
+            "http_429_count": 2768
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "tkt-7003",
+            "acme-logistics"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-23T02:00:01Z",
+        "errors_before_suspected_change": 2787,
+        "errors_after_suspected_change": 0,
+        "subscription_audit": {
+          "tenant_id": "acme-logistics",
+          "plan": "enterprise-annual",
+          "tier": "enterprise",
+          "mrr_cents": 2400000,
+          "contract_end": "2027-06-30",
+          "billing_model": "usage",
+          "price_change_count": 0
+        },
+        "gateway_errors": [
+          {
+            "http_status": 200,
+            "error_code": "",
+            "cnt": 5177
+          },
+          {
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "cnt": 2768
+          },
+          {
+            "http_status": 503,
+            "error_code": "unavailable",
+            "cnt": 17
+          }
+        ],
+        "cited_ids": [
+          "tkt-7003",
+          "acme-logistics"
+        ]
+      },
+      "citations": [
+        "tkt-7003",
+        "acme-logistics"
+      ],
+      "world_entity_id": "ent_5da7245ae37b"
+    },
+    {
+      "id": "H2",
+      "title": "api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk",
+      "category": "deployment",
+      "suspected_change_id": "dep-1007",
+      "suspected_timestamp": "2026-10-23T03:30:00Z",
+      "target_silo": "ops",
+      "target_service": "api-gateway",
+      "target_cohort": {
+        "service": "api-gateway",
+        "service_version": "8.1.0"
+      },
+      "mechanism": "Deployment dep-1007 (Upgrade envoy 1.31; tune upstream connection pool) shipped at 2026-10-23T03:30:00Z and may have broken upstream connection pooling for /v1/orders/bulk.",
+      "status": "FALSIFIED",
+      "confidence": 0.04,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 1,
+      "round_resolved": 1,
+      "falsification_reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+      "checks": [
+        {
+          "check_name": "temporal_precedence",
+          "passed": false,
+          "summary": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+          "observed": {
+            "incident_started_at": "2026-10-23T02:01:00Z",
+            "suspected_change_at": "2026-10-23T03:30:00Z",
+            "lag_after_onset_minutes": 89.0,
+            "errors_before_change": 2038,
+            "errors_after_change": 749
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "dep-1007",
+            "tr-0018948",
+            "tr-0018973",
+            "tr-0018964",
+            "tr-0018992"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-23T02:00:01Z",
+        "errors_before_suspected_change": 2038,
+        "errors_after_suspected_change": 749,
+        "in_cohort_total": 2862,
+        "in_cohort_errors": 744,
+        "out_cohort_total": 6464,
+        "out_cohort_errors": 2024,
+        "in_cohort_avg_latency_ms": 139.3,
+        "out_cohort_avg_latency_ms": 129.9,
+        "sample_rows": [
+          {
+            "trace_id": "tr-0018948",
+            "correlation_id": "ord-0015490",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0018973",
+            "correlation_id": "ord-0015515",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0018964",
+            "correlation_id": "ord-0015506",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0018992",
+            "correlation_id": "ord-0015534",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0018993",
+            "correlation_id": "ord-0015535",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0018990",
+            "correlation_id": "ord-0015532",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          }
+        ],
+        "cited_ids": [
+          "dep-1007",
+          "tr-0018948",
+          "tr-0018973",
+          "tr-0018964",
+          "tr-0018992"
+        ]
+      },
+      "citations": [
+        "dep-1007",
+        "tr-0018948",
+        "tr-0018973",
+        "tr-0018964",
+        "tr-0018992"
+      ],
+      "world_entity_id": "ent_1c17d506d4f0"
+    },
+    {
+      "id": "H3",
+      "title": "Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling",
+      "category": "config_change",
+      "suspected_change_id": "cfg-302",
+      "suspected_timestamp": "2026-10-23T01:45:00Z",
+      "target_silo": "ops+telemetry+billing",
+      "target_service": "api-gateway",
+      "target_cohort": {
+        "tenant_tier": "enterprise",
+        "endpoint": "/v1/orders/bulk",
+        "http_status": 429
+      },
+      "mechanism": "Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+      "status": "VERIFIED",
+      "confidence": 0.96,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 2,
+      "round_resolved": 2,
+      "falsification_reason": null,
+      "checks": [
+        {
+          "check_name": "temporal_precedence",
+          "passed": true,
+          "summary": "Temporal Precedence Passed: cfg-302 (2026-10-23T01:45:00Z) occurred 16 minute(s) before or at anomaly onset (2026-10-23T02:01:00Z).",
+          "observed": {
+            "incident_started_at": "2026-10-23T02:01:00Z",
+            "suspected_change_at": "2026-10-23T01:45:00Z",
+            "lead_time_minutes": 16.0
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "cfg-302",
+            "tr-0011642",
+            "tr-0011669",
+            "tr-0011687",
+            "tr-0011700"
+          ]
+        },
+        {
+          "check_name": "cohort_isolation",
+          "passed": true,
+          "summary": "Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00.",
+          "observed": {
+            "in_cohort_errors": 2768,
+            "in_cohort_total": 9326,
+            "in_cohort_error_rate": 0.2968,
+            "out_cohort_errors": 0,
+            "out_cohort_total": 0,
+            "out_cohort_error_rate": 0.0,
+            "in_cohort_avg_latency_ms": 132.8,
+            "out_cohort_avg_latency_ms": 0.0
+          },
+          "p_value": 1.0,
+          "z_score": 0.0,
+          "risk_ratio": 593.61,
+          "cited_ids": [
+            "cfg-302",
+            "tr-0011642",
+            "tr-0011669",
+            "tr-0011687",
+            "tr-0011700"
+          ]
+        },
+        {
+          "check_name": "citation_enforcement",
+          "passed": true,
+          "summary": "Cross-Silo Citation Check Passed: 5 primary-key citations linked across ops, telemetry, and billing silos (cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700).",
+          "observed": {
+            "citation_count": 5,
+            "citations": [
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ]
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "cfg-302",
+            "tr-0011642",
+            "tr-0011669",
+            "tr-0011687",
+            "tr-0011700"
+          ]
+        },
+        {
+          "check_name": "evaluator_independent_sql_check",
+          "passed": true,
+          "summary": "Independent Evaluator SQL confirmed 2768 error traces with HTTP 429 (rate_limited) on /v1/orders/bulk",
+          "observed": {
+            "breakdown": [
+              {
+                "http_status": 429,
+                "error_code": "rate_limited",
+                "cnt": 2768
+              },
+              {
+                "http_status": 503,
+                "error_code": "unavailable",
+                "cnt": 19
+              }
+            ]
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "cfg-302",
+            "tr-0011642",
+            "tr-0011669",
+            "tr-0011687"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-23T02:00:01Z",
+        "errors_before_suspected_change": 0,
+        "errors_after_suspected_change": 2787,
+        "in_cohort_total": 9326,
+        "in_cohort_errors": 2768,
+        "out_cohort_total": 0,
+        "out_cohort_errors": 0,
+        "in_cohort_avg_latency_ms": 132.8,
+        "out_cohort_avg_latency_ms": 0.0,
+        "sample_rows": [
+          {
+            "trace_id": "tr-0011642",
+            "correlation_id": "ord-0008582",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0011669",
+            "correlation_id": "ord-0008609",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0011687",
+            "correlation_id": "ord-0008627",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0011700",
+            "correlation_id": "ord-0008640",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0011683",
+            "correlation_id": "ord-0008623",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          },
+          {
+            "trace_id": "tr-0011688",
+            "correlation_id": "ord-0008628",
+            "http_status": 429,
+            "error_code": "rate_limited",
+            "latency_ms": 3,
+            "event_id": null,
+            "tenant_id": null,
+            "amount_cents": null,
+            "failure_code": null
+          }
+        ],
+        "cited_ids": [
+          "cfg-302",
+          "tr-0011642",
+          "tr-0011669",
+          "tr-0011687",
+          "tr-0011700"
+        ]
+      },
+      "citations": [
+        "cfg-302",
+        "tr-0011642",
+        "tr-0011669",
+        "tr-0011687",
+        "tr-0011700"
+      ],
+      "world_entity_id": "ent_e0d76e0a9111"
+    }
+  ],
+  "verified_root_cause": {
+    "id": "H3",
+    "hypothesis_id": "H3",
+    "title": "Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling",
+    "category": "config_change",
+    "suspected_change_id": "cfg-302",
+    "suspected_timestamp": "2026-10-23T01:45:00Z",
+    "mechanism": "Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+    "confidence": 0.96,
+    "citations": [
+      "cfg-302",
+      "tr-0011642",
+      "tr-0011669",
+      "tr-0011687",
+      "tr-0011700"
+    ],
+    "statistical_proof": {
+      "in_cohort_error_rate": 0.2968,
+      "out_cohort_error_rate": 0.0,
+      "in_cohort_errors": 2768,
+      "in_cohort_total": 9326,
+      "risk_ratio": 593.61,
+      "z_score": 0.0,
+      "p_value": 1.0
+    }
+  },
+  "falsified_hypotheses": [
+    {
+      "id": "H1",
+      "hypothesis_id": "H1",
+      "title": "Customer-side pullback due to recent plan price increase (ticket tkt-7003)",
+      "category": "pricing_change",
+      "suspected_change_id": "tkt-7003",
+      "suspected_timestamp": "2026-10-23T09:10:00Z",
+      "falsification_reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+      "why_falsified": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+      "failed_check": "contract_ledger_check",
+      "citations": [
+        "tkt-7003",
+        "acme-logistics"
+      ]
+    },
+    {
+      "id": "H2",
+      "hypothesis_id": "H2",
+      "title": "api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk",
+      "category": "deployment",
+      "suspected_change_id": "dep-1007",
+      "suspected_timestamp": "2026-10-23T03:30:00Z",
+      "falsification_reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+      "why_falsified": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+      "failed_check": "temporal_precedence",
+      "citations": [
+        "dep-1007",
+        "tr-0018948",
+        "tr-0018973",
+        "tr-0018964",
+        "tr-0018992"
+      ]
+    }
+  ],
+  "financial_impact": {
+    "gross_failed_volume_usd": 443171.2,
+    "deduplicated_lost_revenue_usd": 177236.46,
+    "hourly_burn_rate_usd": 23684.16,
+    "failed_checkout_count": 1107,
+    "total_checkout_count": 7649,
+    "retry_inflation_factor": 2.5,
+    "affected_tenants": [
+      "acme-logistics"
+    ],
+    "currency": "USD",
+    "methodology_note": "Evaluator Financial Audit Caught Retry Inflation: naive trace-to-billing join reported $443,171.20 across retried trace spans (2.50x inflation). Evaluator deduplicated by distinct billing.checkout_events.event_id to confirm true net lost revenue of $177,236.46 ($23,684.16/hr across 1107 checkouts).",
+    "net_revenue_at_risk_usd": 177236.46
+  },
+  "executive_summary": "Root cause isolated to cfg-302 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:tkt-7003, H2:dep-1007) before confirming that cfg-302 preceded the 2026-10-23T02:01:00Z onset and drove an in-cohort failure rate of 29.7% vs 0.00% outside the cohort (risk ratio 593.61x, z=0.0, p=1.0). Net deduplicated revenue loss: $177,236.46 ($23,684.16/hr).",
+  "remediation_plan": [
+    "Revert api-gateway config change cfg-302 (`rate_limit.enterprise_burst_per_min` 50 -> 500 req/min) via Terraform.",
+    "Replay dead-lettered /v1/orders/bulk payloads for acme-logistics and orbit-freight from 02:01..09:30 UTC.",
+    "Notify Customer Success on ticket tkt-7003 that the sync failure was an accidental gateway burst-limit change, not a pricing or plan modification."
+  ],
+  "post_remediation_verification_sql": "SELECT tenant, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/orders/bulk' AND tenant_tier = 'enterprise' GROUP BY tenant, http_status",
+  "limitations_and_caveats": [
+    "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+    "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+  ],
+  "output": {
+    "summary": "Root cause isolated to cfg-302 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:tkt-7003, H2:dep-1007) before confirming that cfg-302 preceded the 2026-10-23T02:01:00Z onset and drove an in-cohort failure rate of 29.7% vs 0.00% outside the cohort (risk ratio 593.61x, z=0.0, p=1.0). Net deduplicated revenue loss: $177,236.46 ($23,684.16/hr).",
+    "verified_root_cause": {
+      "id": "H3",
+      "hypothesis_id": "H3",
+      "title": "Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling",
+      "category": "config_change",
+      "suspected_change_id": "cfg-302",
+      "suspected_timestamp": "2026-10-23T01:45:00Z",
+      "mechanism": "Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+      "confidence": 0.96,
+      "citations": [
+        "cfg-302",
+        "tr-0011642",
+        "tr-0011669",
+        "tr-0011687",
+        "tr-0011700"
+      ],
+      "statistical_proof": {
+        "in_cohort_error_rate": 0.2968,
+        "out_cohort_error_rate": 0.0,
+        "in_cohort_errors": 2768,
+        "in_cohort_total": 9326,
+        "risk_ratio": 593.61,
+        "z_score": 0.0,
+        "p_value": 1.0
+      }
+    },
+    "falsified_red_herrings": [
+      {
+        "id": "H1",
+        "hypothesis_id": "H1",
+        "title": "Customer-side pullback due to recent plan price increase (ticket tkt-7003)",
+        "category": "pricing_change",
+        "suspected_change_id": "tkt-7003",
+        "suspected_timestamp": "2026-10-23T09:10:00Z",
+        "falsification_reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+        "why_falsified": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+        "failed_check": "contract_ledger_check",
+        "citations": [
+          "tkt-7003",
+          "acme-logistics"
+        ]
+      },
+      {
+        "id": "H2",
+        "hypothesis_id": "H2",
+        "title": "api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk",
+        "category": "deployment",
+        "suspected_change_id": "dep-1007",
+        "suspected_timestamp": "2026-10-23T03:30:00Z",
+        "falsification_reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+        "why_falsified": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+        "failed_check": "temporal_precedence",
+        "citations": [
+          "dep-1007",
+          "tr-0018948",
+          "tr-0018973",
+          "tr-0018964",
+          "tr-0018992"
+        ]
+      }
+    ],
+    "financial_impact": {
+      "gross_failed_volume_usd": 443171.2,
+      "deduplicated_lost_revenue_usd": 177236.46,
+      "hourly_burn_rate_usd": 23684.16,
+      "failed_checkout_count": 1107,
+      "total_checkout_count": 7649,
+      "retry_inflation_factor": 2.5,
+      "affected_tenants": [
+        "acme-logistics"
+      ],
+      "currency": "USD",
+      "methodology_note": "Evaluator Financial Audit Caught Retry Inflation: naive trace-to-billing join reported $443,171.20 across retried trace spans (2.50x inflation). Evaluator deduplicated by distinct billing.checkout_events.event_id to confirm true net lost revenue of $177,236.46 ($23,684.16/hr across 1107 checkouts).",
+      "net_revenue_at_risk_usd": 177236.46
+    },
+    "recommendations": [
+      "Revert api-gateway config change cfg-302 (`rate_limit.enterprise_burst_per_min` 50 -> 500 req/min) via Terraform.",
+      "Replay dead-lettered /v1/orders/bulk payloads for acme-logistics and orbit-freight from 02:01..09:30 UTC.",
+      "Notify Customer Success on ticket tkt-7003 that the sync failure was an accidental gateway burst-limit change, not a pricing or plan modification."
+    ],
+    "post_remediation_verification_sql": "SELECT tenant, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/orders/bulk' AND tenant_tier = 'enterprise' GROUP BY tenant, http_status",
+    "limitations_and_caveats": [
+      "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+      "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+    ]
+  },
+  "result": {
+    "incident_id": "INC-8892",
+    "incident_title": "Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+    "executive_summary": "Root cause isolated to cfg-302 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:tkt-7003, H2:dep-1007) before confirming that cfg-302 preceded the 2026-10-23T02:01:00Z onset and drove an in-cohort failure rate of 29.7% vs 0.00% outside the cohort (risk ratio 593.61x, z=0.0, p=1.0). Net deduplicated revenue loss: $177,236.46 ($23,684.16/hr).",
+    "verified_root_cause": {
+      "id": "H3",
+      "hypothesis_id": "H3",
+      "title": "Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling",
+      "category": "config_change",
+      "suspected_change_id": "cfg-302",
+      "suspected_timestamp": "2026-10-23T01:45:00Z",
+      "mechanism": "Terraform config change cfg-302 at 2026-10-23T01:45:00Z (16 minutes before the 02:01 UTC nightly sync window) reduced rate_limit.enterprise_burst_per_min from 500 to 50 req/min, throttling acme-logistics (~60 req/min burst) with HTTP 429 rate_limited.",
+      "confidence": 0.96,
+      "citations": [
+        "cfg-302",
+        "tr-0011642",
+        "tr-0011669",
+        "tr-0011687",
+        "tr-0011700"
+      ],
+      "statistical_proof": {
+        "in_cohort_error_rate": 0.2968,
+        "out_cohort_error_rate": 0.0,
+        "in_cohort_errors": 2768,
+        "in_cohort_total": 9326,
+        "risk_ratio": 593.61,
+        "z_score": 0.0,
+        "p_value": 1.0
+      }
+    },
+    "falsified_red_herrings": [
+      {
+        "id": "H1",
+        "hypothesis_id": "H1",
+        "title": "Customer-side pullback due to recent plan price increase (ticket tkt-7003)",
+        "category": "pricing_change",
+        "suspected_change_id": "tkt-7003",
+        "suspected_timestamp": "2026-10-23T09:10:00Z",
+        "falsification_reason": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+        "why_falsified": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+        "failed_check": "contract_ledger_check",
+        "citations": [
+          "tkt-7003",
+          "acme-logistics"
+        ]
+      },
+      {
+        "id": "H2",
+        "hypothesis_id": "H2",
+        "title": "api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk",
+        "category": "deployment",
+        "suspected_change_id": "dep-1007",
+        "suspected_timestamp": "2026-10-23T03:30:00Z",
+        "falsification_reason": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+        "why_falsified": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+        "failed_check": "temporal_precedence",
+        "citations": [
+          "dep-1007",
+          "tr-0018948",
+          "tr-0018973",
+          "tr-0018964",
+          "tr-0018992"
+        ]
+      }
+    ],
+    "financial_impact": {
+      "gross_failed_volume_usd": 443171.2,
+      "deduplicated_lost_revenue_usd": 177236.46,
+      "hourly_burn_rate_usd": 23684.16,
+      "failed_checkout_count": 1107,
+      "total_checkout_count": 7649,
+      "retry_inflation_factor": 2.5,
+      "affected_tenants": [
+        "acme-logistics"
+      ],
+      "currency": "USD",
+      "methodology_note": "Evaluator Financial Audit Caught Retry Inflation: naive trace-to-billing join reported $443,171.20 across retried trace spans (2.50x inflation). Evaluator deduplicated by distinct billing.checkout_events.event_id to confirm true net lost revenue of $177,236.46 ($23,684.16/hr across 1107 checkouts).",
+      "net_revenue_at_risk_usd": 177236.46
+    },
+    "remediation_plan": [
+      "Revert api-gateway config change cfg-302 (`rate_limit.enterprise_burst_per_min` 50 -> 500 req/min) via Terraform.",
+      "Replay dead-lettered /v1/orders/bulk payloads for acme-logistics and orbit-freight from 02:01..09:30 UTC.",
+      "Notify Customer Success on ticket tkt-7003 that the sync failure was an accidental gateway burst-limit change, not a pricing or plan modification."
+    ],
+    "post_remediation_verification_sql": "SELECT tenant, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/orders/bulk' AND tenant_tier = 'enterprise' GROUP BY tenant, http_status",
+    "limitations_and_caveats": [
+      "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+      "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+    ],
+    "reviewer_revisions": 1,
+    "reviewer_issues_resolved": [
+      "Missing explicit caveat distinguishing observational cohort correlation from controlled causation",
+      "Missing post-remediation Zetaris verification SQL query for on-call validation"
+    ]
+  },
+  "trace_events": [
+    {
+      "seq": 1,
+      "timestamp": "2026-10-26T11:48:17.413Z",
+      "elapsed_ms": 12,
+      "run_id": "INC-8892",
+      "agent_name": "Orchestrator",
+      "action": "investigation_started",
+      "input_summary": "incident_id=INC-8892 scenario=scenario_02_rate_limit_churn",
+      "output_summary": "Hydrated Meterless H-MEM (15 warm memories) & opened World Model",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "sample_mode": true,
+        "zetaris_backend": "sqlite-federation",
+        "nvidia_llm_available": false
+      }
+    },
+    {
+      "seq": 2,
+      "timestamp": "2026-10-26T11:48:17.429Z",
+      "elapsed_ms": 28,
+      "run_id": "INC-8892",
+      "agent_name": "PlannerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Initial hypotheses for INC-8892 enterprise_order_sync_drop Why did enterprise tenant acme-logistics bulk order volume dr",
+      "output_summary": "Injected 6 H-MEM memories + 1 World Model entities",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 1,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 3,
+      "timestamp": "2026-10-26T11:48:17.642Z",
+      "elapsed_ms": 241,
+      "run_id": "INC-8892",
+      "agent_name": "PlannerAgent",
+      "action": "decompose_question",
+      "input_summary": "Incident INC-8892 (enterprise_order_sync_drop) onset=2026-10-23T02:01:00Z",
+      "output_summary": "Formulated 2 Round-1 hypotheses: H1 [tkt-7003 @ 2026-10-23T09:10:00Z]; H2 [dep-1007 @ 2026-10-23T03:30:00Z]",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "model_lane": "reasoning (nvidia/llama-3.3-nemotron-super-49b-v1)",
+        "hypotheses": [
+          "H1",
+          "H2"
+        ],
+        "hmem_reinjected": 6,
+        "llm_note": null
+      }
+    },
+    {
+      "seq": 4,
+      "timestamp": "2026-10-26T11:48:17.649Z",
+      "elapsed_ms": 249,
+      "run_id": "INC-8892",
+      "agent_name": "ExecutorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Execute SQL verification for ['H1', 'H2'] on INC-8892",
+      "output_summary": "Injected 6 H-MEM memories + 15 World Model entities",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 15,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 5,
+      "timestamp": "2026-10-26T11:48:17.652Z",
+      "elapsed_ms": 252,
+      "run_id": "INC-8892",
+      "agent_name": "ExecutorAgent",
+      "action": "TOOL_ERROR_RECOVERY",
+      "input_summary": "billing window breakdown (cross-silo column alignment) failed (SQL error: no such column: platform)",
+      "output_summary": "Inspected {billing}.checkout_events schema ['event_id', 'checkout_ref', 'tenant_id', 'created_at', 'amount_cents', 'currency', 'status', 'failure_code', 'device_os', 'app_version', 'region_code', 'channel']; repaired columns {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'} and retried",
+      "target_agent": "ZetarisAdapter",
+      "status": "recovered",
+      "meta": {
+        "silo": "billing",
+        "table": "checkout_events",
+        "discovered_columns": [
+          "event_id",
+          "checkout_ref",
+          "tenant_id",
+          "created_at",
+          "amount_cents",
+          "currency",
+          "status",
+          "failure_code",
+          "device_os",
+          "app_version",
+          "region_code",
+          "channel"
+        ],
+        "column_repairs": {
+          "timestamp": "created_at",
+          "platform": "device_os",
+          "client_version": "app_version",
+          "error_code": "failure_code"
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "timestamp": "2026-10-26T11:48:18.008Z",
+      "elapsed_ms": 607,
+      "run_id": "INC-8892",
+      "agent_name": "ExecutorAgent",
+      "action": "query_zetaris",
+      "input_summary": "Round 1 hypotheses ['H1', 'H2']",
+      "output_summary": "Completed federated SQL queries across billing, telemetry & ops silos (backend=sqlite-federation, queries_total=18)",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "round": 1,
+        "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+        "backend": "sqlite-federation",
+        "schema_recoveries": 1
+      }
+    },
+    {
+      "seq": 7,
+      "timestamp": "2026-10-26T11:48:18.010Z",
+      "elapsed_ms": 610,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Evaluate Round 1 hypotheses ['H1', 'H2'] for INC-8892",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 8,
+      "timestamp": "2026-10-26T11:48:18.043Z",
+      "elapsed_ms": 643,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_FALSIFIED",
+      "input_summary": "Evaluating H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003))",
+      "output_summary": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+      "target_agent": "PlannerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "round": 1,
+        "hypothesis_id": "H1",
+        "suspected_change_id": "tkt-7003",
+        "checks": [
+          {
+            "check_name": "contract_ledger_check",
+            "passed": false,
+            "summary": "Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn.",
+            "observed": {
+              "plan": "enterprise-annual",
+              "contract_end": "2027-06-30",
+              "price_change_count": 0,
+              "http_429_count": 2768
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "tkt-7003",
+              "acme-logistics"
+            ]
+          }
+        ],
+        "citations": [
+          "tkt-7003",
+          "acme-logistics"
+        ]
+      }
+    },
+    {
+      "seq": 9,
+      "timestamp": "2026-10-26T11:48:18.109Z",
+      "elapsed_ms": 708,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_FALSIFIED",
+      "input_summary": "Evaluating H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk)",
+      "output_summary": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+      "target_agent": "PlannerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "round": 1,
+        "hypothesis_id": "H2",
+        "suspected_change_id": "dep-1007",
+        "checks": [
+          {
+            "check_name": "temporal_precedence",
+            "passed": false,
+            "summary": "Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause.",
+            "observed": {
+              "incident_started_at": "2026-10-23T02:01:00Z",
+              "suspected_change_at": "2026-10-23T03:30:00Z",
+              "lag_after_onset_minutes": 89.0,
+              "errors_before_change": 2038,
+              "errors_after_change": 749
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "dep-1007",
+              "tr-0018948",
+              "tr-0018973",
+              "tr-0018964",
+              "tr-0018992"
+            ]
+          }
+        ],
+        "citations": [
+          "dep-1007",
+          "tr-0018948",
+          "tr-0018973",
+          "tr-0018964",
+          "tr-0018992"
+        ]
+      }
+    },
+    {
+      "seq": 10,
+      "timestamp": "2026-10-26T11:48:18.110Z",
+      "elapsed_ms": 709,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "financial_audit_correction",
+      "input_summary": "Naive trace join reported $443,171.20",
+      "output_summary": "Evaluator Financial Audit Caught Retry Inflation: naive trace-to-billing join reported $443,171.20 across retried trace spans (2.50x inflation). Evaluator deduplicated by distinct billing.checkout_events.event_id to confirm true net lost revenue of $177,236.46 ($23,684.16/hr across 1107 checkouts).",
+      "target_agent": "SynthesizerAgent",
+      "status": "corrected",
+      "meta": {
+        "gross_failed_volume_usd": 443171.2,
+        "deduplicated_lost_revenue_usd": 177236.46,
+        "retry_inflation_factor": 2.5
+      }
+    },
+    {
+      "seq": 11,
+      "timestamp": "2026-10-26T11:48:18.113Z",
+      "elapsed_ms": 712,
+      "run_id": "INC-8892",
+      "agent_name": "PlannerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Revise plan for INC-8892 after falsifying ['dep-1007', 'tkt-7003']; feedback=Falsified ['H1', 'H2']; requesting revised ",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 12,
+      "timestamp": "2026-10-26T11:48:18.137Z",
+      "elapsed_ms": 736,
+      "run_id": "INC-8892",
+      "agent_name": "PlannerAgent",
+      "action": "revise_plan",
+      "input_summary": "Evaluator falsified ['dep-1007', 'tkt-7003']: Falsified ['H1', 'H2']; requesting revised plan from PlannerAgent.",
+      "output_summary": "Formulated Round-2 hypothesis H3: Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling [cfg-302 @ 2026-10-23T01:45:00Z]",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "falsified_change_ids": [
+          "dep-1007",
+          "tkt-7003"
+        ],
+        "hmem_falsifications_loaded": 4,
+        "new_hypotheses": [
+          "H3"
+        ]
+      }
+    },
+    {
+      "seq": 13,
+      "timestamp": "2026-10-26T11:48:18.142Z",
+      "elapsed_ms": 741,
+      "run_id": "INC-8892",
+      "agent_name": "ExecutorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Execute SQL verification for ['H1', 'H2', 'H3'] on INC-8892",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 14,
+      "timestamp": "2026-10-26T11:48:18.512Z",
+      "elapsed_ms": 1112,
+      "run_id": "INC-8892",
+      "agent_name": "ExecutorAgent",
+      "action": "query_zetaris",
+      "input_summary": "Round 2 hypotheses ['H1', 'H2', 'H3']",
+      "output_summary": "Completed federated SQL queries across billing, telemetry & ops silos (backend=sqlite-federation, queries_total=26)",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+        "backend": "sqlite-federation",
+        "schema_recoveries": 1
+      }
+    },
+    {
+      "seq": 15,
+      "timestamp": "2026-10-26T11:48:18.520Z",
+      "elapsed_ms": 1120,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Evaluate Round 2 hypotheses ['H1', 'H2', 'H3'] for INC-8892",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 16,
+      "timestamp": "2026-10-26T11:48:18.651Z",
+      "elapsed_ms": 1252,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_VERIFIED",
+      "input_summary": "Evaluating H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling)",
+      "output_summary": "All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. | Independent Zetaris check confirmed (Independent Evaluator SQL confirmed 2768 error traces with HTTP 429 (rate_limited) on /v1/orders/bulk)",
+      "target_agent": "SynthesizerAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "hypothesis_id": "H3",
+        "suspected_change_id": "cfg-302",
+        "checks": [
+          {
+            "check_name": "temporal_precedence",
+            "passed": true,
+            "summary": "Temporal Precedence Passed: cfg-302 (2026-10-23T01:45:00Z) occurred 16 minute(s) before or at anomaly onset (2026-10-23T02:01:00Z).",
+            "observed": {
+              "incident_started_at": "2026-10-23T02:01:00Z",
+              "suspected_change_at": "2026-10-23T01:45:00Z",
+              "lead_time_minutes": 16.0
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ]
+          },
+          {
+            "check_name": "cohort_isolation",
+            "passed": true,
+            "summary": "Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00.",
+            "observed": {
+              "in_cohort_errors": 2768,
+              "in_cohort_total": 9326,
+              "in_cohort_error_rate": 0.2968,
+              "out_cohort_errors": 0,
+              "out_cohort_total": 0,
+              "out_cohort_error_rate": 0.0,
+              "in_cohort_avg_latency_ms": 132.8,
+              "out_cohort_avg_latency_ms": 0.0
+            },
+            "p_value": 1.0,
+            "z_score": 0.0,
+            "risk_ratio": 593.61,
+            "cited_ids": [
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ]
+          },
+          {
+            "check_name": "citation_enforcement",
+            "passed": true,
+            "summary": "Cross-Silo Citation Check Passed: 5 primary-key citations linked across ops, telemetry, and billing silos (cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700).",
+            "observed": {
+              "citation_count": 5,
+              "citations": [
+                "cfg-302",
+                "tr-0011642",
+                "tr-0011669",
+                "tr-0011687",
+                "tr-0011700"
+              ]
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ]
+          },
+          {
+            "check_name": "evaluator_independent_sql_check",
+            "passed": true,
+            "summary": "Independent Evaluator SQL confirmed 2768 error traces with HTTP 429 (rate_limited) on /v1/orders/bulk",
+            "observed": {
+              "breakdown": [
+                {
+                  "http_status": 429,
+                  "error_code": "rate_limited",
+                  "cnt": 2768
+                },
+                {
+                  "http_status": 503,
+                  "error_code": "unavailable",
+                  "cnt": 19
+                }
+              ]
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687"
+            ]
+          }
+        ],
+        "citations": [
+          "cfg-302",
+          "tr-0011642",
+          "tr-0011669",
+          "tr-0011687",
+          "tr-0011700"
+        ]
+      }
+    },
+    {
+      "seq": 17,
+      "timestamp": "2026-10-26T11:48:18.655Z",
+      "elapsed_ms": 1254,
+      "run_id": "INC-8892",
+      "agent_name": "EvaluatorAgent",
+      "action": "financial_audit_correction",
+      "input_summary": "Naive trace join reported $443,171.20",
+      "output_summary": "Evaluator Financial Audit Caught Retry Inflation: naive trace-to-billing join reported $443,171.20 across retried trace spans (2.50x inflation). Evaluator deduplicated by distinct billing.checkout_events.event_id to confirm true net lost revenue of $177,236.46 ($23,684.16/hr across 1107 checkouts).",
+      "target_agent": "SynthesizerAgent",
+      "status": "corrected",
+      "meta": {
+        "gross_failed_volume_usd": 443171.2,
+        "deduplicated_lost_revenue_usd": 177236.46,
+        "retry_inflation_factor": 2.5
+      }
+    },
+    {
+      "seq": 18,
+      "timestamp": "2026-10-26T11:48:18.660Z",
+      "elapsed_ms": 1259,
+      "run_id": "INC-8892",
+      "agent_name": "SynthesizerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Synthesize root-cause brief for INC-8892",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "SynthesizerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 19,
+      "timestamp": "2026-10-26T11:48:18.661Z",
+      "elapsed_ms": 1261,
+      "run_id": "INC-8892",
+      "agent_name": "SynthesizerAgent",
+      "action": "draft_explanation",
+      "input_summary": "Verified=H3 (cfg-302), Falsified=['H1', 'H2']",
+      "output_summary": "Drafted root-cause brief citing 5 primary keys across 3 silos",
+      "target_agent": "FinalReviewerAgent",
+      "status": "success",
+      "meta": {
+        "verified_hypothesis": "H3",
+        "citation_count": 5
+      }
+    },
+    {
+      "seq": 20,
+      "timestamp": "2026-10-26T11:48:18.663Z",
+      "elapsed_ms": 1262,
+      "run_id": "INC-8892",
+      "agent_name": "FinalReviewerAgent",
+      "action": "review_output",
+      "input_summary": "Auditing draft for INC-8892",
+      "output_summary": "Requested revision: Missing explicit caveat distinguishing observational cohort correlation from controlled causation; Missing post-remediation Zetaris verification SQL query for on-call validation",
+      "target_agent": "SynthesizerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "issues": [
+          "Missing explicit caveat distinguishing observational cohort correlation from controlled causation",
+          "Missing post-remediation Zetaris verification SQL query for on-call validation"
+        ]
+      }
+    },
+    {
+      "seq": 21,
+      "timestamp": "2026-10-26T11:48:18.664Z",
+      "elapsed_ms": 1263,
+      "run_id": "INC-8892",
+      "agent_name": "SynthesizerAgent",
+      "action": "revise_explanation",
+      "input_summary": "Addressing 2 reviewer requirement(s)",
+      "output_summary": "Added observational-causation caveats, confidence decomposition, and post-remediation SQL check.",
+      "target_agent": "FinalReviewerAgent",
+      "status": "success",
+      "meta": {
+        "revision_count": 1
+      }
+    },
+    {
+      "seq": 22,
+      "timestamp": "2026-10-26T11:48:18.665Z",
+      "elapsed_ms": 1264,
+      "run_id": "INC-8892",
+      "agent_name": "FinalReviewerAgent",
+      "action": "approve_final",
+      "input_summary": "Revised root-cause brief for INC-8892",
+      "output_summary": "Approved final report (confidence=0.96, lost_revenue=$177,236.46)",
+      "target_agent": "APIResponse",
+      "status": "success",
+      "meta": {
+        "confidence": 0.96
+      }
+    },
+    {
+      "seq": 23,
+      "timestamp": "2026-10-26T11:48:18.665Z",
+      "elapsed_ms": 1265,
+      "run_id": "INC-8892",
+      "agent_name": "Orchestrator",
+      "action": "investigation_completed",
+      "input_summary": "Completed 2 investigative round(s) + reviewer loop",
+      "output_summary": "Root cause verified: cfg-302 in 1.267s",
+      "target_agent": null,
+      "status": "success",
+      "meta": {
+        "rounds": 2,
+        "execution_time_seconds": 1.267
+      }
+    }
+  ]
+}

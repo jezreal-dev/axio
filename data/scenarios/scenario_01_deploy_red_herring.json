@@ -1,0 +1,31 @@
+{
+  "scenario_id": "scenario_01_deploy_red_herring",
+  "incident_id": "INC-8891",
+  "title": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+  "metric": "checkout_conversion_drop",
+  "started_at": "2026-10-22T14:05:00Z",
+  "ended_at": "2026-10-22T15:10:00Z",
+  "baseline_start": "2026-10-22T12:00:00Z",
+  "baseline_end": "2026-10-22T14:00:00Z",
+  "endpoint_hint": "/v1/checkout/confirm",
+  "symptom_summary": "Storefront checkout conversion dropped sharply starting at 2026-10-22T14:05:00Z. On-call suspects checkout-service deployment v3.4.2 shipped today, and merchants brightmart and kairo-shop opened urgent tickets about iPhone payment failures.",
+  "red_herrings": [
+    {
+      "change_id": "dep-1005",
+      "description": "checkout-service v3.4.2 deployed at 2026-10-22T14:20:00Z",
+      "why_plausible": "Shipped during the incident window and touched payment logging",
+      "why_falsified": "Temporal precedence violation: anomaly began at 14:05:00Z (15 minutes before dep-1005)"
+    },
+    {
+      "change_id": "cfg-301",
+      "description": "stripe.api_timeout_ms tuned from 8000ms to 7500ms at 13:40:00Z",
+      "why_plausible": "Preceded the anomaly by 25 minutes on checkout-service",
+      "why_falsified": "Cohort isolation check: Android and Web checkouts sharing cfg-301 had 0.00% failure rate"
+    }
+  ],
+  "ground_truth_root_cause": {
+    "change_id": "flg-502",
+    "description": "Feature flag stripe_intent_v2 enabled to 100% of ios & app_version >= 2.1.0 at 2026-10-22T14:04:00Z",
+    "mechanism": "iOS client v2.1.0 omits mandate_data when stripe_intent_v2=true, triggering HTTP 422 payment_intent_unprocessable"
+  }
+}

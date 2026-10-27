@@ -1,0 +1,470 @@
+{
+  "schema_version": "1.0.0",
+  "memories": [
+    {
+      "id": "mem_3365db6c42e3",
+      "content": "Incident INC-8891 opened with onset 2026-10-22T14:05:00Z: Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+      "memory_type": "factual",
+      "layer": "working",
+      "timestamp": "2026-10-27T12:54:58.017Z",
+      "last_accessed": "2026-10-27T12:54:58.803Z",
+      "access_count": 7,
+      "tags": [
+        "INC-8891",
+        "incident",
+        "incident_opened"
+      ],
+      "confidence": 1.0,
+      "source": "event:incident_opened",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "INC-8891"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "Orchestrator",
+      "run_id": "INC-8891",
+      "task_id": ""
+    },
+    {
+      "id": "mem_96f0967772db",
+      "content": "Schema mapping learned for {billing}.checkout_events: column repairs {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'}",
+      "memory_type": "procedural",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:58.291Z",
+      "last_accessed": "2026-10-27T12:54:58.803Z",
+      "access_count": 6,
+      "tags": [
+        "billing",
+        "checkout_events",
+        "schema",
+        "sql_schema_repaired"
+      ],
+      "confidence": 0.99,
+      "source": "event:sql_schema_repaired",
+      "domain": "incident_investigation",
+      "namespace": "tooling/zetaris_schema",
+      "entities": [
+        "billing.checkout_events"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "ExecutorAgent",
+      "run_id": "INC-8891",
+      "task_id": ""
+    },
+    {
+      "id": "mem_31531c2289ee",
+      "content": "FALSIFIED H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm): Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause. [citations: dep-1005, tr-0008060, evt-0006224, tr-0008076, evt-0006232, tr-0008080, evt-0006234, tr-0008082, evt-0006235]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:58.536Z",
+      "last_accessed": "2026-10-27T12:54:58.803Z",
+      "access_count": 5,
+      "tags": [
+        "dep-1005",
+        "deployment",
+        "falsified",
+        "hypothesis_falsified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H1",
+        "dep-1005",
+        "evt-0006224",
+        "evt-0006232",
+        "evt-0006234",
+        "evt-0006235",
+        "tr-0008060",
+        "tr-0008076",
+        "tr-0008080",
+        "tr-0008082"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "INC-8891",
+      "task_id": ""
+    },
+    {
+      "id": "mem_55343e69844c",
+      "content": "FALSIFIED H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts): Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301. [citations: cfg-301]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:58.569Z",
+      "last_accessed": "2026-10-27T12:54:58.803Z",
+      "access_count": 5,
+      "tags": [
+        "cfg-301",
+        "config_change",
+        "falsified",
+        "hypothesis_falsified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H2",
+        "cfg-301"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "INC-8891",
+      "task_id": ""
+    },
+    {
+      "id": "mem_01e9e5c8f206",
+      "content": "VERIFIED ROOT CAUSE H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422): All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. [citations: flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120, tr-0007872, evt-0006130, tr-0007876, evt-0006132]",
+      "memory_type": "invariant",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:59.055Z",
+      "last_accessed": "2026-10-27T12:54:59.059Z",
+      "access_count": 2,
+      "tags": [
+        "feature_flag",
+        "flg-502",
+        "hypothesis_verified",
+        "root_cause",
+        "verified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_verified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H3",
+        "evt-0006119",
+        "evt-0006120",
+        "evt-0006130",
+        "evt-0006132",
+        "flg-502",
+        "tr-0007850",
+        "tr-0007852",
+        "tr-0007872",
+        "tr-0007876"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "INC-8891",
+      "task_id": ""
+    },
+    {
+      "id": "mem_43bb2e8e3158",
+      "content": "Incident INC-8891 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+      "memory_type": "factual",
+      "layer": "working",
+      "timestamp": "2026-10-27T12:54:56.275Z",
+      "last_accessed": "2026-10-27T12:54:58.601Z",
+      "access_count": 13,
+      "tags": [
+        "INC-8891",
+        "incident",
+        "incident_opened"
+      ],
+      "confidence": 1.0,
+      "source": "event:incident_opened",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "INC-8891"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "Orchestrator",
+      "run_id": "run-37c85f93",
+      "task_id": ""
+    },
+    {
+      "id": "mem_5bde4ba8f643",
+      "content": "FALSIFIED H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003)): Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections — proving the drop is server-side throttling, not customer pricing churn. [citations: tkt-7003, acme-logistics]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:56.698Z",
+      "last_accessed": "2026-10-27T12:54:58.803Z",
+      "access_count": 14,
+      "tags": [
+        "falsified",
+        "hypothesis_falsified",
+        "pricing_change",
+        "tkt-7003"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H1",
+        "acme-logistics",
+        "tkt-7003"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-37c85f93",
+      "task_id": ""
+    },
+    {
+      "id": "mem_34315b8bcfc9",
+      "content": "FALSIFIED H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk): Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause. [citations: dep-1007, tr-0018948, tr-0018973, tr-0018964, tr-0018992]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:56.744Z",
+      "last_accessed": "2026-10-27T12:54:58.577Z",
+      "access_count": 8,
+      "tags": [
+        "dep-1007",
+        "deployment",
+        "falsified",
+        "hypothesis_falsified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H2",
+        "dep-1007",
+        "tr-0018948",
+        "tr-0018964",
+        "tr-0018973",
+        "tr-0018992"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-37c85f93",
+      "task_id": ""
+    },
+    {
+      "id": "mem_1fbd40b60d96",
+      "content": "VERIFIED ROOT CAUSE H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling): All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. [citations: cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700]",
+      "memory_type": "invariant",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:57.090Z",
+      "last_accessed": "2026-10-27T12:54:57.093Z",
+      "access_count": 2,
+      "tags": [
+        "cfg-302",
+        "config_change",
+        "hypothesis_verified",
+        "root_cause",
+        "verified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_verified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H3",
+        "cfg-302",
+        "tr-0011642",
+        "tr-0011669",
+        "tr-0011687",
+        "tr-0011700"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-37c85f93",
+      "task_id": ""
+    },
+    {
+      "id": "mem_a0ee8d017a2c",
+      "content": "Incident INC-8891 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+      "memory_type": "factual",
+      "layer": "working",
+      "timestamp": "2026-10-27T12:54:57.136Z",
+      "last_accessed": "2026-10-27T12:54:58.601Z",
+      "access_count": 10,
+      "tags": [
+        "INC-8891",
+        "incident",
+        "incident_opened"
+      ],
+      "confidence": 1.0,
+      "source": "event:incident_opened",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "INC-8891"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "Orchestrator",
+      "run_id": "run-9a3919b1",
+      "task_id": ""
+    },
+    {
+      "id": "mem_e09fa3b3273a",
+      "content": "FALSIFIED H1 (new_tax_engine feature-flag rollout (flg-505) caused checkout tax timeouts): Temporal Precedence Violation: suspected change flg-505 occurred at 2026-10-24T19:00:00Z, which is 48 minutes AFTER the anomaly started at 2026-10-24T18:12:00Z (150 error traces were already recorded before 2026-10-24T19:00:00Z). An effect cannot precede its cause. [citations: flg-505, tr-0032403, evt-0025310, tr-0032404, tr-0032756, evt-0025626, tr-0032757]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:57.407Z",
+      "last_accessed": "2026-10-27T12:54:57.774Z",
+      "access_count": 5,
+      "tags": [
+        "falsified",
+        "feature_flag",
+        "flg-505",
+        "hypothesis_falsified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H1",
+        "evt-0025310",
+        "evt-0025626",
+        "flg-505",
+        "tr-0032403",
+        "tr-0032404",
+        "tr-0032756",
+        "tr-0032757"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-9a3919b1",
+      "task_id": ""
+    },
+    {
+      "id": "mem_438dc5ddaff3",
+      "content": "FALSIFIED H2 (Global code bug in tax-service v4.2.0 deployment (dep-1011) broke all tax calculations): Cohort Isolation Falsification: inside predicted cohort ({'service': 'tax-service', 'service_version': '4.2.0', 'scope': 'global'}) error rate is 0.00% (0/349), whereas outside cohort error rate is 61.30% (388/633). The anomaly is NOT isolated to dep-1011. [citations: dep-1011]",
+      "memory_type": "falsification",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:57.451Z",
+      "last_accessed": "2026-10-27T12:54:57.774Z",
+      "access_count": 5,
+      "tags": [
+        "dep-1011",
+        "deployment",
+        "falsified",
+        "hypothesis_falsified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_falsified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H2",
+        "dep-1011"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-9a3919b1",
+      "task_id": ""
+    },
+    {
+      "id": "mem_30f3a601bf5b",
+      "content": "VERIFIED ROOT CAUSE H3 (Third-party upstream provider taxly-eu 504 timeout degradation in eu-west-1 amplified by 3x retry loop): All falsification checks passed for H3 (upstream-taxly-eu-504): Cohort Isolation Verified: in-cohort failure rate = 76.1% (388/510) vs out-of-cohort = 0.00% (0/472), risk_ratio = 1521.57x, z = 24.36, p = 4.03e-131. [citations: upstream-taxly-eu-504, tr-0031723, evt-0025013, tr-0031724, tr-0031729, evt-0025015, tr-0031734, evt-0025017]",
+      "memory_type": "invariant",
+      "layer": "long_term",
+      "timestamp": "2026-10-27T12:54:57.867Z",
+      "last_accessed": "2026-10-27T12:54:57.870Z",
+      "access_count": 2,
+      "tags": [
+        "hypothesis_verified",
+        "root_cause",
+        "upstream-taxly-eu-504",
+        "upstream_provider",
+        "verified"
+      ],
+      "confidence": 0.99,
+      "source": "event:hypothesis_verified",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "H3",
+        "evt-0025013",
+        "evt-0025015",
+        "evt-0025017",
+        "tr-0031723",
+        "tr-0031724",
+        "tr-0031729",
+        "tr-0031734",
+        "upstream-taxly-eu-504"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "EvaluatorAgent",
+      "run_id": "run-9a3919b1",
+      "task_id": ""
+    },
+    {
+      "id": "mem_bd4d121739dd",
+      "content": "Incident INC-8892 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+      "memory_type": "factual",
+      "layer": "working",
+      "timestamp": "2026-10-27T12:54:49.951Z",
+      "last_accessed": "2026-10-27T12:54:50.975Z",
+      "access_count": 7,
+      "tags": [
+        "INC-8892",
+        "incident",
+        "incident_opened"
+      ],
+      "confidence": 1.0,
+      "source": "event:incident_opened",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "INC-8892"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "Orchestrator",
+      "run_id": "INC-8892",
+      "task_id": ""
+    },
+    {
+      "id": "mem_69c47e5e7e12",
+      "content": "Incident INC-8893 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+      "memory_type": "factual",
+      "layer": "working",
+      "timestamp": "2026-10-27T12:54:51.320Z",
+      "last_accessed": "2026-10-27T12:54:52.401Z",
+      "access_count": 7,
+      "tags": [
+        "INC-8893",
+        "incident",
+        "incident_opened"
+      ],
+      "confidence": 1.0,
+      "source": "event:incident_opened",
+      "domain": "incident_investigation",
+      "namespace": "orchestration/root_cause",
+      "entities": [
+        "INC-8893"
+      ],
+      "related_to": [],
+      "supersedes": null,
+      "derived_from": [],
+      "agent_id": "Orchestrator",
+      "run_id": "INC-8893",
+      "task_id": ""
+    }
+  ]
+}

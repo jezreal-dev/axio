@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Axio — 8-Slide Hackathon Pitch Deck (Track 2: The Agent That Can Explain Why)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --panel: #101726;
+      --card: #161f33;
+      --border: #24324d;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --indigo: #818cf8;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --amber: #f59e0b;
+      --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      --mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060911;
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Control Bar (hidden when printing to PDF) */
+    .deck-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: #0b111e;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--blue), #6366f1);
+      color: #090d16;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #0ea5e9, #4f46e5);
+      border: none;
+      color: #fff;
+    }
+
+    .btn-pdf:hover { color: #fff; opacity: 0.92; }
+
+    /* Slides Viewport */
+    .slides-wrapper {
+      max-width: 1240px;
+      width: 100%;
+      margin: 24px auto 48px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .slide {
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 45%), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 42px 48px;
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(36, 50, 77, 0.8);
+      padding-bottom: 14px;
+    }
+
+    .slide-num {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--blue);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+
+    .slide-kicker {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.12;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--blue);
+    }
+
+    .hook-quote {
+      background: rgba(56, 189, 248, 0.09);
+      border-left: 4px solid var(--blue);
+      padding: 18px 22px;
+      border-radius: 0 10px 10px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin: 18px 0;
+      line-height: 1.45;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .card-emerald {
+      border-color: var(--emerald);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .card-rose {
+      border-color: var(--rose);
+      background: rgba(244, 63, 94, 0.08);
+    }
+
+    .card-amber {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.09);
+    }
+
+    ul {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #cbd5e1;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--blue);
+      background: #0b111e;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13.5px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 11px 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #0b111e;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    td { background: rgba(22, 31, 51, 0.7); }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(36, 50, 77, 0.6);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .flow-diagram {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: #0b111e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+    }
+
+    @media print {
+      @page { size: landscape; margin: 0.4in; }
+      body { background: #090d16; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .deck-toolbar { display: none !important; }
+      .slides-wrapper { margin: 0; padding: 0; max-width: none; gap: 0; }
+      .slide { page-break-after: always; break-after: page; min-height: 92vh; margin-bottom: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck-toolbar">
+    <div class="toolbar-left">
+      <div class="logo-badge">AX</div>
+      <div>
+        <strong>Axio — 8-Slide Hackathon Pitch Deck</strong>
+        <span style="color:var(--muted);font-size:12px;margin-left:8px;">Open Agent Hackathon 2026 · Track 2 · Team Agentic Army</span>
+      </div>
+    </div>
+    <div class="toolbar-actions">
+      <a href="/" class="btn">← Back to Live War-Room UI</a>
+      <button class="btn btn-pdf" onclick="window.print()">🖨️ Print / Save as PDF (Ctrl+P)</button>
+    </div>
+  </div>
+
+  <div class="slides-wrapper">
+    <!-- SLIDE 1: Title & Hook -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 01 / 08 · TITLE &amp; VISION</span>
+          <span class="slide-kicker">Open Agent Hackathon 2026 · Track 2: The Agent That Can Explain Why</span>
+        </div>
+        <h1>Axio</h1>
+        <p style="font-size:22px;color:var(--blue);font-weight:700;margin-bottom:14px;">
+          The Adversarial Multi-Agent Root-Cause &amp; Silent Revenue Leak Investigator
+        </p>
+        <div class="hook-quote">
+          "War rooms waste hours debating false leads. <strong>Axio</strong> uses mathematical falsification to eliminate the decoys, proving the real root cause and exact dollar leak in seconds.<br/>
+          <span style="font-size:16px;color:var(--muted);">War rooms argue over theories; Axio leaves them with axioms."</span>
+        </div>
+
+        <div class="grid-2" style="margin-top:24px;">
+          <div class="card">
+            <h3>Built By Team Agentic Army</h3>
+            <ul>
+              <li><strong>Jezreal Momoh</strong> — Backend Developer, Full-Stack Developer, Scrum Master, Technical Writer</li>
+              <li><strong>Victor Okpe</strong> — Full-Stack Developer, ML/AI Engineer, Mobile Developer</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Load-Bearing Sponsor Stack</h3>
+            <ul>
+              <li><strong>Zetaris</strong> — Federated SQL across <code>{billing}</code>, <code>{telemetry}</code> &amp; <code>{ops}</code> silos</li>
+              <li><strong>Meterless</strong> — Headless World Model Engine + H-MEM Procedural Memory + Trust Ledger</li>
+              <li><strong>NVIDIA Nemotron</strong> — Dual-Lane Router (<code>Super-49B</code> Reasoning + <code>Nano-9B</code> Fast)</li>
+              <li><strong>Cursor</strong> — AI-native IDE used to architect the 5-agent cyclic state machine</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio (IncidentWhy Engine) · Team Agentic Army</span>
+        <span>Slide 1 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Problem & Target Users -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 02 / 08 · THE PROBLEM &amp; TARGET USERS</span>
+          <span class="slide-kicker">1. Problem Statement &amp; Target Persona</span>
+        </div>
+        <h2>Why Production War Rooms Chase Red Herrings While Revenue Leaks</h2>
+        <p style="color:var(--muted);font-size:15px;margin-bottom:18px;">
+          <strong>Target Users:</strong> On-Call SREs, Backend &amp; Mobile Engineering Leads, and FinOps / Revenue Operations Teams at API-driven SaaS &amp; E-Commerce companies.
+        </p>
+
+        <div class="grid-3">
+          <div class="card card-rose">
+            <h3>Trap 1: Recency Bias (Innocent Deploys)</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              Checkout conversion drops 38% at <code>14:05 UTC</code>. Engineers immediately roll back <code>checkout-service v3.4.2</code> (<code>dep-1005</code>)—wasting 2 hours—even though <code>dep-1005</code> shipped at <code>14:20 UTC</code> (<strong>15 minutes AFTER</strong> the crash started).
+            </p>
+          </div>
+          <div class="card card-rose">
+            <h3>Trap 2: Narrative Bias (Ticket Panic)</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              Enterprise tenant <code>acme-logistics</code> volume drops 80% alongside an angry support ticket (<code>tkt-7003</code>) blaming "new pricing". Teams panic over churn—missing that <code>billing.plan_changes</code> has <code>0</code> changes and the API gateway is throwing <code>HTTP 429</code>.
+            </p>
+          </div>
+          <div class="card card-rose">
+            <h3>Trap 3: 2.69x Retry Financial Inflation</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              During an EU <code>504</code> timeout storm, each checkout retries 3 times. Naive telemetry-to-billing joins multiply retried spans, over-reporting lost revenue at <strong>$24,415.46</strong> instead of the true <strong>$9,084.40</strong> net loss.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Root Problem: Fragmented Silos + Yes-Man LLM Summarizers</h3>
+          <p style="font-size:14px;color:#cbd5e1;">
+            Evidence is split across <strong>Billing</strong> (Stripe/ERP), <strong>Telemetry</strong> (APM/Gateway), and <strong>Ops</strong> (GitHub/LaunchDarkly/Terraform). Standard RAG copilots summarize Slack/ticket text instead of executing cross-silo SQL math to <em>disprove</em> false leads.
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Problem &amp; Target Users</span>
+        <span>Slide 2 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: The Solution -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 03 / 08 · THE SOLUTION</span>
+          <span class="slide-kicker">2. How Axio Solves the Challenge</span>
+        </div>
+        <h2>Axio: Scientific Hypothesis Falsification Across Disconnected Silos</h2>
+        <p style="color:var(--muted);font-size:15px;margin-bottom:18px;">
+          Instead of guessing or summarizing tickets, <strong>Axio</strong> treats root-cause investigation as a formal mathematical elimination tournament:
+        </p>
+
+        <div class="grid-2">
+          <div class="card card-emerald">
+            <h3>4 Deterministic Evaluator Falsification Rules</h3>
+            <ul>
+              <li><strong>1. Temporal Precedence Check (<code>cause_ts &le; onset_ts</code>):</strong> Automatically rejects any deployment or flag change that occurred after the earliest anomaly trace in <code>{telemetry}.api_traces</code>.</li>
+              <li><strong>2. Contract &amp; Ledger Contradiction Check:</strong> Reconciles customer support claims against <code>{billing}.subscriptions</code> and <code>{billing}.plan_changes</code>.</li>
+              <li><strong>3. Two-Proportion Cohort Z-Test &amp; Risk Ratio:</strong> Computes in-cohort vs. out-of-cohort failure rates ($z > 3.29, p < 0.001$) to prove fault isolation.</li>
+              <li><strong>4. Primary-Key Citation &amp; Retry Deduplication:</strong> Enforces multi-silo row citations and deduplicates financial impact via <code>COUNT(DISTINCT billing.checkout_events.event_id)</code>.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>What the User Gets in Under 2 Seconds</h3>
+            <ul>
+              <li><strong>Visual Falsification Graph:</strong> Shows Round-1 war-room decoys rejected in red with exact SQL math proofs, and the true Round-2 root cause verified in green.</li>
+              <li><strong>Deduplicated Dollar-Impact Audit:</strong> Separates gross retried failure volume from net lost revenue and hourly burn rate.</li>
+              <li><strong>Actionable Remediation Runbook + Verification SQL:</strong> Step-by-step rollback instructions plus a copy-paste Zetaris SQL query enforced by <code>FinalReviewerAgent</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Solution Overview</span>
+        <span>Slide 3 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Agent Workflow & Architecture -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 04 / 08 · AGENT WORKFLOW &amp; ARCHITECTURE</span>
+          <span class="slide-kicker">3. Multi-Agent Cyclic State Machine</span>
+        </div>
+        <h2>5 Specialized Agents With Two Active Critique &amp; Revision Loops</h2>
+
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <strong style="color:var(--blue);">1. PlannerAgent</strong><br/>
+            <span style="font-size:11px;color:var(--indigo);">Nemotron Super-49B</span>
+            <p style="margin-top:6px;color:#cbd5e1;">Scans <code>{ops}</code> change surface, proposes Round-1 hypotheses, and pivots to Round-2 candidates when Evaluator rejects decoys.</p>
+          </div>
+          <div class="flow-step">
+            <strong style="color:var(--blue);">2. ExecutorAgent</strong><br/>
+            <span style="font-size:11px;color:var(--blue);">Nemotron Nano-9B</span>
+            <p style="margin-top:6px;color:#cbd5e1;">Executes federated Zetaris SQL across 3 silos + performs live <code>TOOL_ERROR_RECOVERY</code> schema repair stored in Meterless H-MEM.</p>
+          </div>
+          <div class="flow-step" style="border-color:var(--rose);">
+            <strong style="color:var(--rose);">3. EvaluatorAgent</strong><br/>
+            <span style="font-size:11px;color:var(--indigo);">Nemotron Super-49B</span>
+            <p style="margin-top:6px;color:#cbd5e1;">Adversarial SRE &amp; FinOps critic. Runs independent SQL + 4 falsification tests. Emits <code>NEEDS_REVISION</code> or <code>HYPOTHESIS_VERIFIED</code>.</p>
+          </div>
+          <div class="flow-step">
+            <strong style="color:var(--emerald);">4. SynthesizerAgent</strong><br/>
+            <span style="font-size:11px;color:var(--indigo);">Nemotron Super-49B</span>
+            <p style="margin-top:6px;color:#cbd5e1;">Compiles the cited Root-Cause &amp; Dollar-Impact Brief with primary keys across all 3 silos.</p>
+          </div>
+          <div class="flow-step" style="border-color:var(--amber);">
+            <strong style="color:var(--amber);">5. FinalReviewerAgent</strong><br/>
+            <span style="font-size:11px;color:var(--blue);">Nemotron Nano-9B</span>
+            <p style="margin-top:6px;color:#cbd5e1;">Audits brief, triggers <code>NEEDS_REVISION</code> to enforce causal caveats &amp; post-fix SQL, then approves.</p>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:16px;">
+          <div class="card card-amber">
+            <h3>Loop A: Adversarial Falsification Loop (Round 1 &rarr; Round 2)</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;">
+              When <code>EvaluatorAgent</code> falsifies Round-1 hypotheses (<code>H1</code>, <code>H2</code>), it writes the rejection proof into the <strong>Meterless World Model</strong> and sends <code>NEEDS_REVISION</code> back to <code>PlannerAgent</code> to formulate <code>H3</code>.
+            </p>
+          </div>
+          <div class="card card-emerald">
+            <h3>Loop B: Methodological Reviewer Loop (Draft &rarr; Revision &rarr; Approval)</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;">
+              <code>FinalReviewerAgent</code> blocks initial synthesis until observational-correlation vs. controlled-causation caveats and a post-remediation Zetaris verification SQL query are included.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Multi-Agent Workflow &amp; Architecture</span>
+        <span>Slide 4 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Technical Stack & How Zetaris + Meterless Were Used -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 05 / 08 · TECHNICAL STACK &amp; SPONSOR INTEGRATION</span>
+          <span class="slide-kicker">4 &amp; 5. Technical Stack + How Zetaris &amp; Meterless Were Used</span>
+        </div>
+        <h2>Load-Bearing Zetaris Data Federation &amp; Meterless Dual-Engine Cognition</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Zetaris Federated SQL Harness (<code>app/adapters/zetaris.py</code>)</h3>
+            <ul>
+              <li><strong>REST &amp; Offline Federation Parity:</strong> Implements Zetaris <code>POST /sql-editor/sqls/run</code> (with <code>X-Org-ID</code> &amp; <code>X-Request-ID</code>) and an offline <code>SAMPLE_MODE=true</code> 3-silo SQLite federation engine across 58,067 rows:
+                <ul>
+                  <li><code>{billing}</code>: <code>checkout_events</code> (23,130 rows), <code>subscriptions</code>, <code>plan_changes</code></li>
+                  <li><code>{telemetry}</code>: <code>api_traces</code> (34,901 distributed trace spans)</li>
+                  <li><code>{ops}</code>: <code>deployments</code>, <code>flag_changes</code>, <code>config_changes</code>, <code>support_tickets</code></li>
+                </ul>
+              </li>
+              <li>Executes 27–29 federated queries per run, including cross-silo <code>JOIN</code>s between <code>{telemetry}.api_traces.correlation_id</code> and <code>{billing}.checkout_events.checkout_ref</code>.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Meterless World Model + H-MEM (<code>app/adapters/meterless_memory.py</code>)</h3>
+            <ul>
+              <li><strong>World Model Agent Engine:</strong> <code>WorldStoreService</code>, <code>IngestPipelineService</code>, <code>ContextBuilderService</code> (with explicit <code>wired_vs_helper_manifest</code>), and headless <code>ControlPlaneService</code> (<code>GET /api/world-model</code>). Tracks continuity anchors (<code>incident:INC-8891@2026-10-22T14:05:00Z</code>) and hypothesis state transitions.</li>
+              <li><strong>H-MEM Agent Engine:</strong> <code>MemoryStoreService</code> (<code>short_term</code>, <code>working</code>, <code>long_term</code> layers across <code>episodic</code>, <code>semantic</code>, <code>procedural</code>, <code>factual</code>), <code>MemoryMiningService</code> (with injected generator function), <code>MemoryRetrievalService</code>, and append-only <code>TrustLedgerService</code> (<code>GET /api/memory</code>).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <h3>Zero-Friction Runtime &amp; Observability Stack</h3>
+          <p style="font-size:13.5px;color:#cbd5e1;">
+            Built on Python 3.12 (<code>ThreadingHTTPServer</code>, Server-Sent Events <code>GET /api/stream/{run_id}</code>, Docker containerization, structured JSONL traces in <code>logs/trace-&lt;run_id&gt;.jsonl</code>) + <strong>NVIDIA Nemotron</strong> dual-lane OpenAI-compatible router (<code>llama-3.3-nemotron-super-49b-v1</code> &amp; <code>nvidia-nemotron-nano-9b-v2</code>).
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Technical Stack &amp; Sponsor Architecture</span>
+        <span>Slide 5 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: What Was Unique About Sponsor Tech Usage -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 06 / 08 · UNIQUE SPONSOR INNOVATION</span>
+          <span class="slide-kicker">6. What Was Unique About Our Use of Sponsor Technologies</span>
+        </div>
+        <h2>Three Architectural Innovations Combining Zetaris, Meterless &amp; Nemotron</h2>
+
+        <div class="grid-3">
+          <div class="card card-amber">
+            <h3>1. Zetaris Schema Introspection &rarr; Meterless H-MEM Procedural Learning</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              In Round 1, <code>ExecutorAgent</code> queries <code>{billing}.checkout_events</code> using telemetry column names (<code>timestamp</code>, <code>platform</code>). When SQL fails, <code>ZetarisAdapter</code> introspects the billing schema via <code>describe()</code>, repairs the columns to <code>created_at</code> and <code>device_os</code> (<code>TOOL_ERROR_RECOVERY</code>), and stores a <strong>procedural memory in Meterless H-MEM</strong>. In Round 2, <code>ExecutorAgent</code> retrieves that H-MEM memory and executes clean SQL on the first try!
+            </p>
+          </div>
+
+          <div class="card card-emerald">
+            <h3>2. Adversarial Falsification State in Meterless World Model</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              Rather than using Meterless as passive chat history, Axio models every war-room hypothesis as a first-class <strong>World Model entity</strong> with explicit state transitions (<code>TESTING &rarr; FALSIFIED / VERIFIED</code>) and continuity anchors. Re-injected World Model context prevents <code>PlannerAgent</code> from ever re-proposing a falsified red herring.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>3. Cost-Aware NVIDIA Nemotron Dual-Lane Routing</h3>
+            <p style="font-size:13.5px;color:#e2e8f0;line-height:1.5;">
+              High-frequency SQL execution, schema repair, and H-MEM event distillation route to the low-latency <strong>Fast Lane</strong> (<code>nvidia-nemotron-nano-9b-v2</code>), while multi-hypothesis causal decomposition and adversarial falsification route to the <strong>Reasoning Lane</strong> (<code>llama-3.3-nemotron-super-49b-v1</code>).
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Unique Sponsor Technology Synergies</span>
+        <span>Slide 6 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Product Visuals & Verified Results -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 07 / 08 · PRODUCT VISUALS &amp; VERIFIED BENCHMARKS</span>
+          <span class="slide-kicker">7. Product Visuals &amp; Empirical Results Across 3 Scenarios</span>
+        </div>
+        <h2>3-Panel War-Room Dashboard &amp; 100% Verified Multi-Silo Results</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Incident Scenario</th>
+              <th>Round-1 Red Herrings Falsified by Evaluator</th>
+              <th>Round-2 Verified Root Cause</th>
+              <th>Statistical &amp; Financial Proof</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><code>INC-8891</code></strong><br/>Silent Checkout Conversion Drop</td>
+              <td>
+                <span style="color:var(--rose);font-weight:700;">✗ dep-1005</span> (<code>v3.4.2</code> shipped 15m <em>after</em> onset)<br/>
+                <span style="color:var(--rose);font-weight:700;">✗ cfg-301</span> (0.00% error on Android/Web)
+              </td>
+              <td><span style="color:var(--emerald);font-weight:700;">✓ flg-502</span><br/><code>stripe_intent_v2=true</code> on iOS <code>v2.1.0</code> at <code>14:04Z</code></td>
+              <td>In-cohort error <strong>92.4%</strong> (121/131) vs <strong>0.00%</strong> (0/361), <code>z = 21.03</code>, <code>p = 3.61e-98</code>.<br/>Net Loss: <strong>$10,732.46</strong></td>
+            </tr>
+            <tr>
+              <td><strong><code>INC-8892</code></strong><br/>Enterprise Order-Sync Collapse</td>
+              <td>
+                <span style="color:var(--rose);font-weight:700;">✗ tkt-7003</span> (0 price changes in <code>billing.plan_changes</code>)<br/>
+                <span style="color:var(--rose);font-weight:700;">✗ dep-1007</span> (shipped 74m <em>after</em> onset)
+              </td>
+              <td><span style="color:var(--emerald);font-weight:700;">✓ cfg-302</span><br/><code>rate_limit.enterprise_burst_per_min</code> cut <code>500 &rarr; 50</code></td>
+              <td>In-cohort <code>HTTP 429</code> rate <strong>82.0%</strong> (3,663/4,469) vs <strong>0.00%</strong>, <code>z = 46.85</code>.<br/>Net Unfulfilled GMV: <strong>$177,236.46</strong></td>
+            </tr>
+            <tr>
+              <td><strong><code>INC-8893</code></strong><br/>EU Checkout Latency &amp; Retry Storm</td>
+              <td>
+                <span style="color:var(--rose);font-weight:700;">✗ flg-505</span> (ramped 13m <em>after</em> 504 onset)<br/>
+                <span style="color:var(--rose);font-weight:700;">✗ dep-1011</span> (0.00% 504s in <code>us-east-1</code> on <code>v4.2.0</code>)
+              </td>
+              <td><span style="color:var(--emerald);font-weight:700;">✓ upstream-taxly-eu-504</span><br/>External EU tax provider gateway 504s</td>
+              <td>Caught <strong>2.69x retry inflation</strong>: naive join reported <code>$24,415.46</code> &rarr; deduplicated net loss: <strong>$9,084.40</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid-3" style="margin-top:16px;">
+          <div class="card">
+            <h3>Left Panel: Alert &amp; 5-Agent Stepper</h3>
+            <p style="font-size:12.5px;color:#cbd5e1;">One-click scenario selector, custom symptom prompt, SQL mismatch injection toggle, and live Nemotron lane indicators.</p>
+          </div>
+          <div class="card">
+            <h3>Center Panel: Falsification &amp; Brief</h3>
+            <p style="font-size:12.5px;color:#cbd5e1;">Interactive tabs for Hypothesis Falsification Graph, Cited Brief, Zetaris SQL &amp; Recovery diff, and Meterless World Model/H-MEM.</p>
+          </div>
+          <div class="card">
+            <h3>Right Panel: Live SSE JSONL Trace</h3>
+            <p style="font-size:12.5px;color:#cbd5e1;">Real-time Server-Sent Events streaming every agent handoff, <code>TOOL_ERROR_RECOVERY</code>, and <code>NEEDS_REVISION</code> critique.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Product Visuals &amp; Empirical Benchmarks</span>
+        <span>Slide 7 of 8</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Future Enhancements & Roadmap -->
+    <section class="slide">
+      <div>
+        <div class="slide-header">
+          <span class="slide-num">SLIDE 08 / 08 · FUTURE ENHANCEMENTS &amp; ROADMAP</span>
+          <span class="slide-kicker">8. Commercialization &amp; Post-Hackathon Roadmap</span>
+        </div>
+        <h2>From Hackathon War-Room Investigator to Autonomous Causal Control Plane</h2>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>Phase 1: Automated Remediation PRs &amp; Flag Kill-Switches</h3>
+            <p style="font-size:13.5px;color:#cbd5e1;line-height:1.5;">
+              Once <code>EvaluatorAgent</code> verifies a fault cohort with $p < 10^{-6}$ and <code>FinalReviewerAgent</code> approves the brief, automatically open a LaunchDarkly flag kill-switch approval or GitHub revert PR in Slack/PagerDuty.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Phase 2: Streaming Pre-Alert Revenue Leak Detection</h3>
+            <p style="font-size:13.5px;color:#cbd5e1;line-height:1.5;">
+              Run continuous Zetaris windowed queries every 60 seconds to catch silent micro-cohort conversion drops (e.g., a single mobile SDK version in one region) before global error thresholds even fire.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Phase 3: Cross-Company H-MEM Federated Playbooks</h3>
+            <p style="font-size:13.5px;color:#cbd5e1;line-height:1.5;">
+              Persist verified failure signatures (e.g., Stripe PaymentIntent mandate schema mismatches or third-party tax gateway brownouts) in Meterless long-term semantic memory for instant zero-shot recognition.
+            </p>
+          </div>
+        </div>
+
+        <div class="hook-quote" style="margin-top:28px;">
+          <strong>Ready for Judges Right Now:</strong><br/>
+          <code>python3 run.py</code> &nbsp;&middot;&nbsp; <code>POST /run</code> &nbsp;&middot;&nbsp; <code>GET /health</code> &nbsp;&middot;&nbsp; 26/26 Preflight Checks Passed &nbsp;&middot;&nbsp; 100% Reproducible in <code>SAMPLE_MODE=true</code>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Axio · Future Enhancements &amp; Thank You</span>
+        <span>Slide 8 of 8</span>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "request_id": "INC-8892",
+  "incident_id": "INC-8892",
+  "scenario_id": "scenario_02_rate_limit_churn",
+  "title": "Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+  "metric": "enterprise_order_sync_drop",
+  "started_at": "2026-10-23T02:01:00Z",
+  "ended_at": "2026-10-23T09:30:00Z",
+  "baseline_start": "2026-10-22T02:00:00Z",
+  "baseline_end": "2026-10-22T09:30:00Z",
+  "tenant_hint": "acme-logistics",
+  "endpoint_hint": "/v1/orders/bulk",
+  "user_query": "Why did enterprise tenant acme-logistics bulk order volume drop over 80% starting 2026-10-23T02:01:00Z? Support ticket tkt-7003 complains about 'new pricing' and threatens churn, while api-gateway v8.1.0 deployed at 03:15 UTC. Determine the true root cause and financial impact.",
+  "options": {
+    "max_rounds": 3,
+    "inject_sql_mismatch": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "scenario_id": "scenario_03_third_party_timeout_leak",
+  "incident_id": "INC-8893",
+  "title": "EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+  "metric": "checkout_latency_and_timeout_spike",
+  "started_at": "2026-10-24T18:12:00Z",
+  "ended_at": "2026-10-24T20:05:00Z",
+  "baseline_start": "2026-10-24T16:00:00Z",
+  "baseline_end": "2026-10-24T18:00:00Z",
+  "region_hint": "eu-west-1",
+  "endpoint_hint": "/v1/checkout/tax",
+  "symptom_summary": "EU checkout latency spiked above 5000ms with high failure rates starting 2026-10-24T18:12:00Z. Engineers suspect tax-service v4.2.0 (deployed at 17:55 UTC) or the new_tax_engine feature flag rollout.",
+  "red_herrings": [
+    {
+      "change_id": "flg-505",
+      "description": "Feature flag new_tax_engine ramped to 20% at 2026-10-24T18:25:00Z",
+      "why_plausible": "Ramped during the EU tax-service incident window",
+      "why_falsified": "Temporal precedence violation: 504 timeouts began at 18:12:00Z (13 minutes before flg-505)"
+    },
+    {
+      "change_id": "dep-1011",
+      "description": "tax-service v4.2.0 deployed at 2026-10-24T17:55:00Z",
+      "why_plausible": "Shipped 17 minutes before the latency spike",
+      "why_falsified": "Cohort isolation check: US-East-1 running identical tax-service v4.2.0 had 0.00% 504 timeouts; failure isolated 100% to upstream provider taxly-eu in eu-west-1"
+    }
+  ],
+  "ground_truth_root_cause": {
+    "change_id": "upstream-taxly-eu-504",
+    "description": "External tax provider taxly-eu HTTP 504 gateway timeouts in eu-west-1 (18:12–20:05 UTC)",
+    "mechanism": "Upstream taxly-eu degradation caused 5,100–8,900ms timeouts and 3x retry amplification per checkout correlation_id"
+  }
+}

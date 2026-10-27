@@ -1,0 +1,75 @@
+{
+  "project_name": "Axio",
+  "engine_name": "IncidentWhy",
+  "tagline": "War rooms argue over theories; Axio leaves them with axioms — Cross-Silo Root-Cause & Silent Revenue Leak Investigator",
+  "hook": "War rooms waste hours debating false leads. Axio uses mathematical falsification to eliminate the decoys, proving the real root cause and exact dollar leak in seconds.",
+  "hackathon": "Open Agent Hackathon 2026",
+  "track": "Track 2: The Agent That Can Explain Why",
+  "team": {
+    "name": "Agentic Army",
+    "members": [
+      {
+        "name": "Jezreal Momoh",
+        "roles": ["Backend Developer", "Full Stack Developer", "Scrum Master", "Technical Writer"]
+      },
+      {
+        "name": "Victor Okpe",
+        "roles": ["Full Stack Developer", "ML/AI Engineer", "Mobile Developer"]
+      }
+    ]
+  },
+  "entry_point": {
+    "command": "python3 run.py",
+    "port": 8000,
+    "health_endpoint": "GET /health",
+    "run_endpoint": "POST /run",
+    "investigate_endpoint": "POST /api/investigate",
+    "stream_endpoint": "GET /api/stream/{run_id}",
+    "sample_mode_default": true
+  },
+  "agents": [
+    {
+      "name": "PlannerAgent",
+      "model_lane": "reasoning (nvidia/llama-3.3-nemotron-super-49b-v1)",
+      "responsibility": "Decomposes anomalies into testable hypotheses and revises plans after Evaluator falsification"
+    },
+    {
+      "name": "ExecutorAgent",
+      "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+      "responsibility": "Executes cross-silo Zetaris SQL queries across billing, telemetry, and ops silos with live schema error recovery"
+    },
+    {
+      "name": "EvaluatorAgent",
+      "model_lane": "reasoning (nvidia/llama-3.3-nemotron-super-49b-v1)",
+      "responsibility": "Adversarial SRE & FinOps critic enforcing temporal precedence, contract ledger checks, two-proportion z-tests, and retry-inflation deduplication"
+    },
+    {
+      "name": "SynthesizerAgent",
+      "model_lane": "reasoning (nvidia/llama-3.3-nemotron-super-49b-v1)",
+      "responsibility": "Drafts the cited Root-Cause & Dollar-Impact Brief with primary-key evidence across 3 silos"
+    },
+    {
+      "name": "FinalReviewerAgent",
+      "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+      "responsibility": "Audits the brief for correlation-vs-causation caveats and post-remediation Zetaris verification SQL"
+    }
+  ],
+  "sponsor_technologies": [
+    {
+      "sponsor": "Zetaris",
+      "integration": "Federated SQL adapter (/sql-editor/sqls/run with X-Org-ID and X-Request-ID) + offline SQLite 3-silo federation (billing.db, telemetry.db, ops.db) + automatic cross-silo SQL schema error recovery"
+    },
+    {
+      "sponsor": "Meterless",
+      "integration": "Headless World Model Agent Engine (WorldStoreService, IngestPipelineService, ContextBuilderService with wired_vs_helper_manifest, ControlPlaneService) + H-MEM Agent Engine (MemoryStoreService, MemoryMiningService, MemoryRetrievalService, TrustLedgerService) with injected generator function"
+    },
+    {
+      "sponsor": "NVIDIA Nemotron",
+      "integration": "Dual-lane OpenAI-compatible router pairing Llama-3.3-Nemotron-Super-49B (reasoning) and Nemotron-Nano-9B (fast) with deterministic offline fallback"
+    },
+    {
+      "sponsor": "Cursor",
+      "integration": "Primary AI-native IDE used to architect the 5-agent cyclic state machine, Zetaris SQL federation adapter, and automated test suite"
+    }
+  ]
+}

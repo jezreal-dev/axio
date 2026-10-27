@@ -1,0 +1,11 @@
+# IncidentWhy Runtime Dependencies
+# ----------------------------------------------------------------------------
+# IncidentWhy is engineered using Python 3.12 standard library modules
+# (`http.server.ThreadingHTTPServer`, `sqlite3`, `urllib.request`, `dataclasses`,
+# `unittest`, `json`, `math`, `queue`) so that `pip install -r requirements.txt`
+# and `python3 run.py` succeed immediately in both online and air-gapped judge
+# environments without external wheel compilation or network downloads.
+#
+# Optional extras when running with external test runners (uncomment if desired):
+# httpx==0.27.2
+# pytest==8.3.3

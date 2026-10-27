@@ -1,0 +1,18 @@
+{
+  "request_id": "INC-8893",
+  "incident_id": "INC-8893",
+  "scenario_id": "scenario_03_third_party_timeout_leak",
+  "title": "EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+  "metric": "checkout_latency_and_timeout_spike",
+  "started_at": "2026-10-24T18:12:00Z",
+  "ended_at": "2026-10-24T20:05:00Z",
+  "baseline_start": "2026-10-24T16:00:00Z",
+  "baseline_end": "2026-10-24T18:00:00Z",
+  "region_hint": "eu-west-1",
+  "endpoint_hint": "/v1/checkout/tax",
+  "user_query": "Why did EU checkout latency spike above 5000ms with high failure rates starting 2026-10-24T18:12:00Z? Engineers suspect tax-service v4.2.0 (deployed at 17:55 UTC) or the new_tax_engine feature flag rollout. Also audit the financial impact for retry inflation.",
+  "options": {
+    "max_rounds": 3,
+    "inject_sql_mismatch": true
+  }
+}

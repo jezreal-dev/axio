@@ -1,0 +1,17 @@
+{
+  "request_id": "INC-8891",
+  "incident_id": "INC-8891",
+  "scenario_id": "scenario_01_deploy_red_herring",
+  "title": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+  "metric": "checkout_conversion_drop",
+  "started_at": "2026-10-22T14:05:00Z",
+  "ended_at": "2026-10-22T15:10:00Z",
+  "baseline_start": "2026-10-22T12:00:00Z",
+  "baseline_end": "2026-10-22T14:00:00Z",
+  "endpoint_hint": "/v1/checkout/confirm",
+  "user_query": "Why did storefront checkout conversion drop sharply starting at 2026-10-22T14:05:00Z? On-call suspects checkout-service deployment v3.4.2 shipped today, and merchants brightmart and kairo-shop opened urgent tickets about iPhone payment failures. Quantify net lost revenue across billing and telemetry silos.",
+  "options": {
+    "max_rounds": 3,
+    "inject_sql_mismatch": true
+  }
+}

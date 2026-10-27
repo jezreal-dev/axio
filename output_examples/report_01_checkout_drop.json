@@ -1,0 +1,4396 @@
+{
+  "run_id": "INC-8891",
+  "request_id": "INC-8891",
+  "incident_id": "INC-8891",
+  "trace_id": "trace-INC-8891",
+  "status": "success",
+  "track": "The Agent That Can Explain Why",
+  "execution_time_seconds": 1.159,
+  "log_file": "logs/trace-INC-8891.jsonl",
+  "log_path": "logs/trace-INC-8891.jsonl",
+  "agents_used": [
+    "PlannerAgent",
+    "ExecutorAgent",
+    "EvaluatorAgent",
+    "SynthesizerAgent",
+    "FinalReviewerAgent"
+  ],
+  "agents": [
+    {
+      "name": "PlannerAgent",
+      "role": "Decomposes incident into hypotheses and revises plan when Evaluator falsifies red herrings"
+    },
+    {
+      "name": "ExecutorAgent",
+      "role": "Executes cross-silo Zetaris SQL queries with live schema error recovery"
+    },
+    {
+      "name": "EvaluatorAgent",
+      "role": "Adversarial SRE critic running temporal precedence, contract ledger, cohort z-test & citation falsification"
+    },
+    {
+      "name": "SynthesizerAgent",
+      "role": "Drafts the cited Root-Cause & Financial Impact Brief"
+    },
+    {
+      "name": "FinalReviewerAgent",
+      "role": "Audits brief for correlation-vs-causation caveats and post-remediation verification SQL"
+    }
+  ],
+  "collaboration": {
+    "feedback_loop_completed": true,
+    "investigative_rounds": 2,
+    "hypotheses_tested": 3,
+    "hypotheses_falsified": 2,
+    "hypotheses_verified": 1,
+    "sql_schema_recoveries": 1,
+    "reviewer_revision_count": 1,
+    "evaluator_findings": [
+      "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+      "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301."
+    ]
+  },
+  "sponsor_technology": {
+    "zetaris": {
+      "backend": "sqlite-federation",
+      "catalogs": {
+        "billing": "billing",
+        "telemetry": "telemetry",
+        "ops": "ops"
+      },
+      "queries_executed": 29,
+      "schema_recoveries": [
+        {
+          "recovered": true,
+          "silo": "billing",
+          "table": "checkout_events",
+          "initial_error": "SQL error: no such column: platform",
+          "discovered_columns": [
+            "event_id",
+            "checkout_ref",
+            "tenant_id",
+            "created_at",
+            "amount_cents",
+            "currency",
+            "status",
+            "failure_code",
+            "device_os",
+            "app_version",
+            "region_code",
+            "channel"
+          ],
+          "inspected_schema": [
+            "event_id",
+            "checkout_ref",
+            "tenant_id",
+            "created_at",
+            "amount_cents",
+            "currency",
+            "status",
+            "failure_code",
+            "device_os",
+            "app_version",
+            "region_code",
+            "channel"
+          ],
+          "column_repairs": {
+            "timestamp": "created_at",
+            "platform": "device_os",
+            "client_version": "app_version",
+            "error_code": "failure_code"
+          },
+          "final_sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM {billing}.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC",
+          "repaired_sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM {billing}.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        }
+      ],
+      "query_log": [
+        {
+          "purpose": "ops surface scan: deployments on 2026-10-22",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 10,
+          "latency_ms": 23,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT deploy_id, service, version, commit_sha, author, deployed_at, summary FROM ops.deployments WHERE deployed_at >= '2026-10-22T00:00:00Z' ORDER BY deployed_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: support_tickets on 2026-10-22",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 4,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT ticket_id, tenant, opened_at, subject, body, priority FROM ops.support_tickets WHERE opened_at >= '2026-10-22T00:00:00Z' ORDER BY opened_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: flag_changes on 2026-10-22",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 5,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT change_id, flag_key, changed_at, actor, action, rollout_pct, targeting FROM ops.flag_changes WHERE changed_at >= '2026-10-22T00:00:00Z' ORDER BY changed_at ASC"
+        },
+        {
+          "purpose": "ops surface scan: config_changes on 2026-10-22",
+          "backend": "sqlite-federation",
+          "silos": [
+            "ops"
+          ],
+          "rows": 3,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT change_id, service, config_key, old_value, new_value, changed_at, actor, scope FROM ops.config_changes WHERE changed_at >= '2026-10-22T00:00:00Z' ORDER BY changed_at ASC"
+        },
+        {
+          "purpose": "billing window breakdown (cross-silo column alignment)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 0,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "error",
+          "sql": "SELECT platform, client_version, status, error_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE timestamp >= '2026-10-22T14:05:00Z' AND timestamp < '2026-10-22T15:10:00Z' GROUP BY platform, client_version, status, error_code ORDER BY events DESC",
+          "error": "SQL error: no such column: platform"
+        },
+        {
+          "purpose": "schema discovery billing.checkout_events",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT * FROM billing.checkout_events LIMIT 1"
+        },
+        {
+          "purpose": "billing window breakdown (cross-silo column alignment) (repaired)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 10,
+          "latency_ms": 2,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        },
+        {
+          "purpose": "H1: measure earliest anomaly timestamp on /v1/checkout/confirm",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 19,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T00:00:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H1: temporal precedence error split around 2026-10-22T14:20:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 3,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T14:20:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-22T14:20:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H1: cohort isolation test (service_version = '3.4.2')",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 6,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN (service_version = '3.4.2') THEN 1 ELSE 0 END) AS in_cohort_total, SUM(CASE WHEN (service_version = '3.4.2') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS in_cohort_errors, SUM(CASE WHEN NOT (service_version = '3.4.2') THEN 1 ELSE 0 END) AS out_cohort_total, SUM(CASE WHEN NOT (service_version = '3.4.2') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS out_cohort_errors, AVG(CASE WHEN (service_version = '3.4.2') THEN latency_ms END) AS in_cohort_avg_latency_ms, AVG(CASE WHEN NOT (service_version = '3.4.2') THEN latency_ms END) AS out_cohort_avg_latency_ms FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H1: cross-silo row citations (telemetry <-> billing)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 6,
+          "latency_ms": 4,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT t.trace_id, t.correlation_id, t.http_status, t.error_code, t.latency_ms, b.event_id, b.tenant_id, b.amount_cents, b.failure_code FROM telemetry.api_traces t LEFT JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-22T14:05:00Z' AND t.ts_utc < '2026-10-22T15:10:00Z' AND t.endpoint = '/v1/checkout/confirm' AND (service_version = '3.4.2') AND t.http_status IN (422, 429, 504) ORDER BY t.ts_utc ASC LIMIT 6"
+        },
+        {
+          "purpose": "H2: measure earliest anomaly timestamp on /v1/checkout/confirm",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 9,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T00:00:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H2: temporal precedence error split around 2026-10-22T13:40:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 2,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T13:40:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-22T13:40:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H2: cohort isolation test (platform IN ('android', 'web'))",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 7,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN (platform IN ('android', 'web')) THEN 1 ELSE 0 END) AS in_cohort_total, SUM(CASE WHEN (platform IN ('android', 'web')) AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS in_cohort_errors, SUM(CASE WHEN NOT (platform IN ('android', 'web')) THEN 1 ELSE 0 END) AS out_cohort_total, SUM(CASE WHEN NOT (platform IN ('android', 'web')) AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS out_cohort_errors, AVG(CASE WHEN (platform IN ('android', 'web')) THEN latency_ms END) AS in_cohort_avg_latency_ms, AVG(CASE WHEN NOT (platform IN ('android', 'web')) THEN latency_ms END) AS out_cohort_avg_latency_ms FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H2: cross-silo row citations (telemetry <-> billing)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 0,
+          "latency_ms": 4,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT t.trace_id, t.correlation_id, t.http_status, t.error_code, t.latency_ms, b.event_id, b.tenant_id, b.amount_cents, b.failure_code FROM telemetry.api_traces t LEFT JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-22T14:05:00Z' AND t.ts_utc < '2026-10-22T15:10:00Z' AND t.endpoint = '/v1/checkout/confirm' AND (platform IN ('android', 'web')) AND t.http_status IN (422, 429, 504) ORDER BY t.ts_utc ASC LIMIT 6"
+        },
+        {
+          "purpose": "cross-silo trace-to-billing impact join",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 4,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(t.trace_id) AS failed_trace_rows, COUNT(DISTINCT b.event_id) AS distinct_failed_checkouts, COALESCE(SUM(b.amount_cents), 0) AS naive_joined_cents FROM telemetry.api_traces t JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-22T14:05:00Z' AND t.ts_utc < '2026-10-22T15:10:00Z' AND t.endpoint = '/v1/checkout/confirm' AND t.http_status >= 400 AND b.status = 'failed'"
+        },
+        {
+          "purpose": "deduplicated billing failed checkouts",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS failed_checkouts, COALESCE(SUM(amount_cents), 0) AS dedup_failed_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND status = 'failed' AND channel = 'storefront'"
+        },
+        {
+          "purpose": "total storefront checkouts in window",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS total_checkouts FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND channel = 'storefront'"
+        },
+        {
+          "purpose": "affected tenants in billing",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 6,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT tenant_id, COUNT(*) AS failed_cnt, SUM(amount_cents) AS failed_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND status = 'failed' AND channel = 'storefront' GROUP BY tenant_id ORDER BY failed_cents DESC"
+        },
+        {
+          "purpose": "billing window breakdown",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 10,
+          "latency_ms": 2,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT device_os, app_version, status, failure_code, COUNT(*) AS events, SUM(amount_cents) AS total_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' GROUP BY device_os, app_version, status, failure_code ORDER BY events DESC"
+        },
+        {
+          "purpose": "H3: measure earliest anomaly timestamp on /v1/checkout/confirm",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 3,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT MIN(ts_utc) AS first_error_ts, COUNT(*) AS error_count FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T00:00:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm' AND http_status IN (422, 429, 504)"
+        },
+        {
+          "purpose": "H3: temporal precedence error split around 2026-10-22T14:04:00Z",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T14:04:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_before_suspected_change, SUM(CASE WHEN ts_utc >= '2026-10-22T14:04:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND http_status >= 400 THEN 1 ELSE 0 END) AS errors_after_suspected_change FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H3: cohort isolation test (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%')",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 2,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT SUM(CASE WHEN (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') THEN 1 ELSE 0 END) AS in_cohort_total, SUM(CASE WHEN (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS in_cohort_errors, SUM(CASE WHEN NOT (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') THEN 1 ELSE 0 END) AS out_cohort_total, SUM(CASE WHEN NOT (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') AND http_status IN (422, 429, 504) THEN 1 ELSE 0 END) AS out_cohort_errors, AVG(CASE WHEN (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') THEN latency_ms END) AS in_cohort_avg_latency_ms, AVG(CASE WHEN NOT (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') THEN latency_ms END) AS out_cohort_avg_latency_ms FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm'"
+        },
+        {
+          "purpose": "H3: cross-silo row citations (telemetry <-> billing)",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 6,
+          "latency_ms": 0,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT t.trace_id, t.correlation_id, t.http_status, t.error_code, t.latency_ms, b.event_id, b.tenant_id, b.amount_cents, b.failure_code FROM telemetry.api_traces t LEFT JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-22T14:05:00Z' AND t.ts_utc < '2026-10-22T15:10:00Z' AND t.endpoint = '/v1/checkout/confirm' AND (platform = 'ios' AND client_ver = '2.1.0' AND flags LIKE '%,stripe_intent_v2,%') AND t.http_status IN (422, 429, 504) ORDER BY t.ts_utc ASC LIMIT 6"
+        },
+        {
+          "purpose": "cross-silo trace-to-billing impact join",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing",
+            "telemetry"
+          ],
+          "rows": 1,
+          "latency_ms": 5,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(t.trace_id) AS failed_trace_rows, COUNT(DISTINCT b.event_id) AS distinct_failed_checkouts, COALESCE(SUM(b.amount_cents), 0) AS naive_joined_cents FROM telemetry.api_traces t JOIN billing.checkout_events b ON t.correlation_id = b.checkout_ref WHERE t.ts_utc >= '2026-10-22T14:05:00Z' AND t.ts_utc < '2026-10-22T15:10:00Z' AND t.endpoint = '/v1/checkout/confirm' AND t.http_status >= 400 AND b.status = 'failed'"
+        },
+        {
+          "purpose": "deduplicated billing failed checkouts",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS failed_checkouts, COALESCE(SUM(amount_cents), 0) AS dedup_failed_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND status = 'failed' AND channel = 'storefront'"
+        },
+        {
+          "purpose": "total storefront checkouts in window",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 1,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT COUNT(*) AS total_checkouts FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND channel = 'storefront'"
+        },
+        {
+          "purpose": "affected tenants in billing",
+          "backend": "sqlite-federation",
+          "silos": [
+            "billing"
+          ],
+          "rows": 6,
+          "latency_ms": 1,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT tenant_id, COUNT(*) AS failed_cnt, SUM(amount_cents) AS failed_cents FROM billing.checkout_events WHERE created_at >= '2026-10-22T14:05:00Z' AND created_at < '2026-10-22T15:10:00Z' AND status = 'failed' AND channel = 'storefront' GROUP BY tenant_id ORDER BY failed_cents DESC"
+        },
+        {
+          "purpose": "Evaluator independent verification for H3 on /v1/checkout/confirm",
+          "backend": "sqlite-federation",
+          "silos": [
+            "telemetry"
+          ],
+          "rows": 3,
+          "latency_ms": 3,
+          "attempt": 1,
+          "status": "success",
+          "sql": "SELECT http_status, error_code, COUNT(*) AS cnt FROM telemetry.api_traces WHERE ts_utc >= '2026-10-22T14:05:00Z' AND ts_utc < '2026-10-22T15:10:00Z' AND endpoint = '/v1/checkout/confirm' AND http_status >= 400 GROUP BY http_status, error_code ORDER BY cnt DESC"
+        }
+      ]
+    },
+    "meterless": {
+      "world_model": {
+        "schema_version": "1.0.0",
+        "entity_count": 38,
+        "relation_count": 56,
+        "event_count": 7,
+        "entities": [
+          {
+            "id": "ent_deb0f725f86f",
+            "name": "INC-8891",
+            "entity_type": "incident",
+            "description": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2 (onset 2026-10-22T14:05:00Z): Why did storefront checkout conversion drop sharply starting at 2026-10-22T14:05:00Z? On-call suspects checkout-service deployment v3.4.2 shipped today, and merchants brightmart and kairo-shop opened urgent tickets about iPhone payment failures. Quantify net lost revenue across billing and telemetry silos.",
+            "traits": {
+              "incident_id": "INC-8891",
+              "started_at": "2026-10-22T14:05:00Z",
+              "title": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2"
+            },
+            "tags": [
+              "INC-8891",
+              "incident"
+            ],
+            "continuity_anchor": "incident:INC-8891@2026-10-22T14:05:00Z",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.203Z",
+            "last_seen_at": "2026-10-26T11:48:16.203Z",
+            "source_silo": "alert",
+            "primary_keys": [
+              "INC-8891"
+            ],
+            "state": "active",
+            "confidence": 1.0,
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "ent_5ad0373fc479",
+            "name": "dep-1003",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1003: notification-service v2.8.1 at 2026-10-22T11:30:00Z (Batch push notifications)",
+            "traits": {
+              "deploy_id": "dep-1003",
+              "service": "notification-service",
+              "version": "2.8.1",
+              "commit_sha": "944c219",
+              "author": "s.patel",
+              "deployed_at": "2026-10-22T11:30:00Z",
+              "summary": "Batch push notifications"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1003",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.240Z",
+            "last_seen_at": "2026-10-26T11:48:16.240Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1003"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_75e1cca5ba10",
+            "name": "dep-1004",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1004: catalog-service v7.2.0 at 2026-10-22T13:10:00Z (Variant pricing cache)",
+            "traits": {
+              "deploy_id": "dep-1004",
+              "service": "catalog-service",
+              "version": "7.2.0",
+              "commit_sha": "486fc2d",
+              "author": "l.nguyen",
+              "deployed_at": "2026-10-22T13:10:00Z",
+              "summary": "Variant pricing cache"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1004",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.274Z",
+            "last_seen_at": "2026-10-26T11:48:16.274Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1004"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_78b959ea1dd8",
+            "name": "dep-1005",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1005: checkout-service v3.4.2 at 2026-10-22T14:20:00Z (Refactor order summary serializer; bump stripe-python 7.1 -> 7.3)",
+            "traits": {
+              "deploy_id": "dep-1005",
+              "service": "checkout-service",
+              "version": "3.4.2",
+              "commit_sha": "da98138",
+              "author": "a.okafor",
+              "deployed_at": "2026-10-22T14:20:00Z",
+              "summary": "Refactor order summary serializer; bump stripe-python 7.1 -> 7.3"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1005",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.284Z",
+            "last_seen_at": "2026-10-26T11:48:16.284Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1005"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_e9d1cd9fc202",
+            "name": "dep-1006",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1006: search-service v5.0.3 at 2026-10-22T16:45:00Z (Fix typo-tolerance regression)",
+            "traits": {
+              "deploy_id": "dep-1006",
+              "service": "search-service",
+              "version": "5.0.3",
+              "commit_sha": "2c2c290",
+              "author": "m.ruiz",
+              "deployed_at": "2026-10-22T16:45:00Z",
+              "summary": "Fix typo-tolerance regression"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1006",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.288Z",
+            "last_seen_at": "2026-10-26T11:48:16.288Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1006"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_755619a48e91",
+            "name": "dep-1007",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1007: api-gateway v8.1.0 at 2026-10-23T03:30:00Z (Upgrade envoy 1.31; tune upstream connection pool)",
+            "traits": {
+              "deploy_id": "dep-1007",
+              "service": "api-gateway",
+              "version": "8.1.0",
+              "commit_sha": "0c6b87d",
+              "author": "infra-bot",
+              "deployed_at": "2026-10-23T03:30:00Z",
+              "summary": "Upgrade envoy 1.31; tune upstream connection pool"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1007",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.294Z",
+            "last_seen_at": "2026-10-26T11:48:16.294Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1007"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_07cab3bbd8ee",
+            "name": "dep-1008",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1008: checkout-service v3.4.3 at 2026-10-23T10:00:00Z (Order summary currency formatting)",
+            "traits": {
+              "deploy_id": "dep-1008",
+              "service": "checkout-service",
+              "version": "3.4.3",
+              "commit_sha": "f143f8d",
+              "author": "a.okafor",
+              "deployed_at": "2026-10-23T10:00:00Z",
+              "summary": "Order summary currency formatting"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1008",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.300Z",
+            "last_seen_at": "2026-10-26T11:48:16.300Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1008"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_1f9bc8b65c7d",
+            "name": "dep-1009",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1009: catalog-service v7.2.1 at 2026-10-23T15:20:00Z (Cache TTL tweak)",
+            "traits": {
+              "deploy_id": "dep-1009",
+              "service": "catalog-service",
+              "version": "7.2.1",
+              "commit_sha": "d2d81b1",
+              "author": "l.nguyen",
+              "deployed_at": "2026-10-23T15:20:00Z",
+              "summary": "Cache TTL tweak"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1009",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.306Z",
+            "last_seen_at": "2026-10-26T11:48:16.306Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1009"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_b168a5505188",
+            "name": "dep-1010",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1010: notification-service v2.8.2 at 2026-10-24T11:05:00Z (Email template fixes)",
+            "traits": {
+              "deploy_id": "dep-1010",
+              "service": "notification-service",
+              "version": "2.8.2",
+              "commit_sha": "3dd83f9",
+              "author": "s.patel",
+              "deployed_at": "2026-10-24T11:05:00Z",
+              "summary": "Email template fixes"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1010",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.314Z",
+            "last_seen_at": "2026-10-26T11:48:16.314Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1010"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_60114f819754",
+            "name": "dep-1011",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1011: tax-service v4.2.0 at 2026-10-24T17:55:00Z (Add EU VAT rounding rules (OSS scheme))",
+            "traits": {
+              "deploy_id": "dep-1011",
+              "service": "tax-service",
+              "version": "4.2.0",
+              "commit_sha": "3afe96c",
+              "author": "k.weber",
+              "deployed_at": "2026-10-24T17:55:00Z",
+              "summary": "Add EU VAT rounding rules (OSS scheme)"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1011",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.321Z",
+            "last_seen_at": "2026-10-26T11:48:16.321Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1011"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_fa9bfe9362d6",
+            "name": "dep-1012",
+            "entity_type": "deployment",
+            "description": "Deploy dep-1012: search-service v5.0.4 at 2026-10-24T21:00:00Z (Synonym dictionary refresh)",
+            "traits": {
+              "deploy_id": "dep-1012",
+              "service": "search-service",
+              "version": "5.0.4",
+              "commit_sha": "3c0c1c9",
+              "author": "m.ruiz",
+              "deployed_at": "2026-10-24T21:00:00Z",
+              "summary": "Synonym dictionary refresh"
+            },
+            "tags": [
+              "deployment",
+              "ops"
+            ],
+            "continuity_anchor": "ops:deployment:dep-1012",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.329Z",
+            "last_seen_at": "2026-10-26T11:48:16.329Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1012"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_05918e124858",
+            "name": "tkt-7001",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7001 (brightmart at 2026-10-22T14:18:00Z): Customers can't pay on iPhone",
+            "traits": {
+              "ticket_id": "tkt-7001",
+              "tenant": "brightmart",
+              "opened_at": "2026-10-22T14:18:00Z",
+              "subject": "Customers can't pay on iPhone",
+              "body": "Several customers say payment fails right at the confirm step on iPhone since lunch.",
+              "priority": "high"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7001",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.340Z",
+            "last_seen_at": "2026-10-26T11:48:16.340Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7001"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_cd239745dfb7",
+            "name": "tkt-7002",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7002 (kairo-shop at 2026-10-22T14:26:00Z): Checkout broken after your update?",
+            "traits": {
+              "ticket_id": "tkt-7002",
+              "tenant": "kairo-shop",
+              "opened_at": "2026-10-22T14:26:00Z",
+              "subject": "Checkout broken after your update?",
+              "body": "Did you ship an update today? Our payments are failing.",
+              "priority": "high"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7002",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.350Z",
+            "last_seen_at": "2026-10-26T11:48:16.350Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7002"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_61561a1c52ff",
+            "name": "tkt-7003",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7003 (acme-logistics at 2026-10-23T09:10:00Z): Order sync failing - reconsidering plan",
+            "traits": {
+              "ticket_id": "tkt-7003",
+              "tenant": "acme-logistics",
+              "opened_at": "2026-10-23T09:10:00Z",
+              "subject": "Order sync failing - reconsidering plan",
+              "body": "Our nightly order sync has been failing since last night. Frankly we are also evaluating whether the new pricing is worth it for us.",
+              "priority": "urgent"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7003",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.357Z",
+            "last_seen_at": "2026-10-26T11:48:16.357Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7003"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_a3856a08f9e9",
+            "name": "tkt-7004",
+            "entity_type": "ticket",
+            "description": "Ticket tkt-7004 (nordic-goods at 2026-10-24T18:30:00Z): Checkout extremely slow in Germany",
+            "traits": {
+              "ticket_id": "tkt-7004",
+              "tenant": "nordic-goods",
+              "opened_at": "2026-10-24T18:30:00Z",
+              "subject": "Checkout extremely slow in Germany",
+              "body": "German customers wait 10+ seconds at checkout and many give up.",
+              "priority": "high"
+            },
+            "tags": [
+              "ops",
+              "ticket"
+            ],
+            "continuity_anchor": "ops:ticket:tkt-7004",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.367Z",
+            "last_seen_at": "2026-10-26T11:48:16.367Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "tkt-7004"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_9644840749dc",
+            "name": "flg-501",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-501: search_ranking_v5 rollout (50%) at 2026-10-22T10:15:00Z [global]",
+            "traits": {
+              "change_id": "flg-501",
+              "flag_key": "search_ranking_v5",
+              "changed_at": "2026-10-22T10:15:00Z",
+              "actor": "m.ruiz",
+              "action": "rollout",
+              "rollout_pct": 50,
+              "targeting": "global"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-501",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.379Z",
+            "last_seen_at": "2026-10-26T11:48:16.379Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-501"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_df51ce6d03f4",
+            "name": "flg-502",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-502: stripe_intent_v2 enable (100%) at 2026-10-22T14:04:00Z [platform=ios;client_ver>=2.1.0]",
+            "traits": {
+              "change_id": "flg-502",
+              "flag_key": "stripe_intent_v2",
+              "changed_at": "2026-10-22T14:04:00Z",
+              "actor": "j.chen",
+              "action": "enable",
+              "rollout_pct": 100,
+              "targeting": "platform=ios;client_ver>=2.1.0"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-502",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.387Z",
+            "last_seen_at": "2026-10-26T11:48:16.387Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-502"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_9626a94bd1d8",
+            "name": "flg-503",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-503: stripe_intent_v2 disable (0%) at 2026-10-22T15:10:00Z [platform=ios;client_ver>=2.1.0]",
+            "traits": {
+              "change_id": "flg-503",
+              "flag_key": "stripe_intent_v2",
+              "changed_at": "2026-10-22T15:10:00Z",
+              "actor": "j.chen",
+              "action": "disable",
+              "rollout_pct": 0,
+              "targeting": "platform=ios;client_ver>=2.1.0"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-503",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.395Z",
+            "last_seen_at": "2026-10-26T11:48:16.395Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-503"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_3faeddc3007b",
+            "name": "flg-504",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-504: android_checkout_redesign rollout (50%) at 2026-10-23T00:30:00Z [platform=android]",
+            "traits": {
+              "change_id": "flg-504",
+              "flag_key": "android_checkout_redesign",
+              "changed_at": "2026-10-23T00:30:00Z",
+              "actor": "p.ade",
+              "action": "rollout",
+              "rollout_pct": 50,
+              "targeting": "platform=android"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-504",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.405Z",
+            "last_seen_at": "2026-10-26T11:48:16.405Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-504"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_79d6088b0810",
+            "name": "flg-505",
+            "entity_type": "feature_flag",
+            "description": "Flag flg-505: new_tax_engine rollout (20%) at 2026-10-24T19:00:00Z [global]",
+            "traits": {
+              "change_id": "flg-505",
+              "flag_key": "new_tax_engine",
+              "changed_at": "2026-10-24T19:00:00Z",
+              "actor": "k.weber",
+              "action": "rollout",
+              "rollout_pct": 20,
+              "targeting": "global"
+            },
+            "tags": [
+              "feature_flag",
+              "ops"
+            ],
+            "continuity_anchor": "ops:feature_flag:flg-505",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.413Z",
+            "last_seen_at": "2026-10-26T11:48:16.413Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "flg-505"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_762c5ced1eab",
+            "name": "cfg-301",
+            "entity_type": "config_change",
+            "description": "Config cfg-301: checkout-service stripe.api_timeout_ms 8000->6000 at 2026-10-22T13:40:00Z",
+            "traits": {
+              "change_id": "cfg-301",
+              "service": "checkout-service",
+              "config_key": "stripe.api_timeout_ms",
+              "old_value": "8000",
+              "new_value": "6000",
+              "changed_at": "2026-10-22T13:40:00Z",
+              "actor": "a.okafor",
+              "scope": "global"
+            },
+            "tags": [
+              "config_change",
+              "ops"
+            ],
+            "continuity_anchor": "ops:config_change:cfg-301",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.426Z",
+            "last_seen_at": "2026-10-26T11:48:16.426Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-301"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_2f557977f8ac",
+            "name": "cfg-302",
+            "entity_type": "config_change",
+            "description": "Config cfg-302: api-gateway rate_limit.enterprise_burst_per_min 500->50 at 2026-10-23T01:45:00Z",
+            "traits": {
+              "change_id": "cfg-302",
+              "service": "api-gateway",
+              "config_key": "rate_limit.enterprise_burst_per_min",
+              "old_value": "500",
+              "new_value": "50",
+              "changed_at": "2026-10-23T01:45:00Z",
+              "actor": "infra-terraform",
+              "scope": "tier=enterprise"
+            },
+            "tags": [
+              "config_change",
+              "ops"
+            ],
+            "continuity_anchor": "ops:config_change:cfg-302",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.436Z",
+            "last_seen_at": "2026-10-26T11:48:16.436Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-302"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_195818ff4530",
+            "name": "cfg-303",
+            "entity_type": "config_change",
+            "description": "Config cfg-303: tax-service provider.retry_backoff_ms 200->100 at 2026-10-24T16:00:00Z",
+            "traits": {
+              "change_id": "cfg-303",
+              "service": "tax-service",
+              "config_key": "provider.retry_backoff_ms",
+              "old_value": "200",
+              "new_value": "100",
+              "changed_at": "2026-10-24T16:00:00Z",
+              "actor": "k.weber",
+              "scope": "region=us-east-1"
+            },
+            "tags": [
+              "config_change",
+              "ops"
+            ],
+            "continuity_anchor": "ops:config_change:cfg-303",
+            "mention_count": 1,
+            "first_seen_at": "2026-10-26T11:48:16.446Z",
+            "last_seen_at": "2026-10-26T11:48:16.446Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-303"
+            ],
+            "state": "active",
+            "confidence": 0.95,
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1_plan"
+          },
+          {
+            "id": "ent_5da7245ae37b",
+            "name": "H1",
+            "entity_type": "hypothesis",
+            "description": "[FALSIFIED] checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm \u2014 Deployment dep-1005 (Refactor order summary serializer; bump stripe-python 7.1 -> 7.3) shipped at 2026-10-22T14:20:00Z and is the prime on-call suspect for Stripe checkout confirmation failures.",
+            "traits": {
+              "id": "H1",
+              "title": "checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm",
+              "category": "deployment",
+              "suspected_change_id": "dep-1005",
+              "suspected_timestamp": "2026-10-22T14:20:00Z",
+              "target_silo": "ops",
+              "target_service": "checkout-service",
+              "target_cohort": {
+                "service": "checkout-service",
+                "service_version": "3.4.2"
+              },
+              "mechanism": "Deployment dep-1005 (Refactor order summary serializer; bump stripe-python 7.1 -> 7.3) shipped at 2026-10-22T14:20:00Z and is the prime on-call suspect for Stripe checkout confirmation failures.",
+              "status": "FALSIFIED",
+              "confidence": 0.04,
+              "proposed_by": "PlannerAgent",
+              "round_proposed": 1,
+              "round_resolved": 1,
+              "falsification_reason": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+              "checks": [
+                {
+                  "check_name": "temporal_precedence",
+                  "passed": false,
+                  "summary": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+                  "observed": {
+                    "incident_started_at": "2026-10-22T14:05:00Z",
+                    "suspected_change_at": "2026-10-22T14:20:00Z",
+                    "lag_after_onset_minutes": 15.0,
+                    "errors_before_change": 31,
+                    "errors_after_change": 98
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "dep-1005",
+                    "tr-0008060",
+                    "evt-0006224",
+                    "tr-0008076",
+                    "evt-0006232",
+                    "tr-0008080",
+                    "evt-0006234",
+                    "tr-0008082",
+                    "evt-0006235"
+                  ]
+                }
+              ],
+              "evidence_stats": {
+                "observed_onset": "2026-10-22T14:04:42Z",
+                "errors_before_suspected_change": 31,
+                "errors_after_suspected_change": 98,
+                "in_cohort_total": 379,
+                "in_cohort_errors": 93,
+                "out_cohort_total": 113,
+                "out_cohort_errors": 28,
+                "in_cohort_avg_latency_ms": 248.5,
+                "out_cohort_avg_latency_ms": 248.3,
+                "sample_rows": [
+                  {
+                    "trace_id": "tr-0008060",
+                    "correlation_id": "chk-0006224",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 183,
+                    "event_id": "evt-0006224",
+                    "tenant_id": "peak-outfitters",
+                    "amount_cents": 8400,
+                    "failure_code": "payment_intent_unprocessable"
+                  },
+                  {
+                    "trace_id": "tr-0008076",
+                    "correlation_id": "chk-0006232",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 277,
+                    "event_id": "evt-0006232",
+                    "tenant_id": "brightmart",
+                    "amount_cents": 7805,
+                    "failure_code": "payment_intent_unprocessable"
+                  },
+                  {
+                    "trace_id": "tr-0008080",
+                    "correlation_id": "chk-0006234",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 284,
+                    "event_id": "evt-0006234",
+                    "tenant_id": "brightmart",
+                    "amount_cents": 14234,
+                    "failure_code": "payment_intent_unprocessable"
+                  },
+                  {
+                    "trace_id": "tr-0008082",
+                    "correlation_id": "chk-0006235",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 262,
+                    "event_id": "evt-0006235",
+                    "tenant_id": "nordic-goods",
+                    "amount_cents": 10990,
+                    "failure_code": "payment_intent_unprocessable"
+                  },
+                  {
+                    "trace_id": "tr-0008088",
+                    "correlation_id": "chk-0006238",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 161,
+                    "event_id": "evt-0006238",
+                    "tenant_id": "kairo-shop",
+                    "amount_cents": 12881,
+                    "failure_code": "payment_intent_unprocessable"
+                  },
+                  {
+                    "trace_id": "tr-0008108",
+                    "correlation_id": "chk-0006248",
+                    "http_status": 422,
+                    "error_code": "payment_intent_unprocessable",
+                    "latency_ms": 220,
+                    "event_id": "evt-0006248",
+                    "tenant_id": "kairo-shop",
+                    "amount_cents": 3945,
+                    "failure_code": "payment_intent_unprocessable"
+                  }
+                ],
+                "cited_ids": [
+                  "dep-1005",
+                  "tr-0008060",
+                  "evt-0006224",
+                  "tr-0008076",
+                  "evt-0006232",
+                  "tr-0008080",
+                  "evt-0006234",
+                  "tr-0008082",
+                  "evt-0006235"
+                ]
+              },
+              "citations": [
+                "dep-1005",
+                "tr-0008060",
+                "evt-0006224",
+                "tr-0008076",
+                "evt-0006232",
+                "tr-0008080",
+                "evt-0006234",
+                "tr-0008082",
+                "evt-0006235"
+              ],
+              "world_entity_id": "ent_5da7245ae37b"
+            },
+            "tags": [
+              "deployment",
+              "falsified",
+              "hypothesis",
+              "testing"
+            ],
+            "continuity_anchor": "hypothesis:H1:dep-1005",
+            "mention_count": 2,
+            "first_seen_at": "2026-10-26T11:48:16.461Z",
+            "last_seen_at": "2026-10-26T11:48:16.801Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "dep-1005"
+            ],
+            "state": "falsified",
+            "confidence": 0.04,
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1"
+          },
+          {
+            "id": "ent_1c17d506d4f0",
+            "name": "H2",
+            "entity_type": "hypothesis",
+            "description": "[FALSIFIED] Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts \u2014 Config change cfg-301 lowered stripe.api_timeout_ms from 8000ms to 6000ms at 2026-10-22T13:40:00Z across all platforms globally.",
+            "traits": {
+              "id": "H2",
+              "title": "Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts",
+              "category": "config_change",
+              "suspected_change_id": "cfg-301",
+              "suspected_timestamp": "2026-10-22T13:40:00Z",
+              "target_silo": "ops",
+              "target_service": "checkout-service",
+              "target_cohort": {
+                "config_key": "stripe.api_timeout_ms",
+                "scope": "global"
+              },
+              "mechanism": "Config change cfg-301 lowered stripe.api_timeout_ms from 8000ms to 6000ms at 2026-10-22T13:40:00Z across all platforms globally.",
+              "status": "FALSIFIED",
+              "confidence": 0.04,
+              "proposed_by": "PlannerAgent",
+              "round_proposed": 1,
+              "round_resolved": 1,
+              "falsification_reason": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+              "checks": [
+                {
+                  "check_name": "temporal_precedence",
+                  "passed": true,
+                  "summary": "Temporal Precedence Passed: cfg-301 (2026-10-22T13:40:00Z) occurred 25 minute(s) before or at anomaly onset (2026-10-22T14:05:00Z).",
+                  "observed": {
+                    "incident_started_at": "2026-10-22T14:05:00Z",
+                    "suspected_change_at": "2026-10-22T13:40:00Z",
+                    "lead_time_minutes": 25.0
+                  },
+                  "p_value": null,
+                  "z_score": null,
+                  "risk_ratio": null,
+                  "cited_ids": [
+                    "cfg-301"
+                  ]
+                },
+                {
+                  "check_name": "cohort_isolation",
+                  "passed": false,
+                  "summary": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+                  "observed": {
+                    "in_cohort_errors": 0,
+                    "in_cohort_total": 281,
+                    "in_cohort_error_rate": 0.0,
+                    "out_cohort_errors": 121,
+                    "out_cohort_total": 211,
+                    "out_cohort_error_rate": 0.5735
+                  },
+                  "p_value": 2.143e-48,
+                  "z_score": -14.62,
+                  "risk_ratio": 0.0,
+                  "cited_ids": [
+                    "cfg-301"
+                  ]
+                }
+              ],
+              "evidence_stats": {
+                "observed_onset": "2026-10-22T14:04:42Z",
+                "errors_before_suspected_change": 0,
+                "errors_after_suspected_change": 129,
+                "in_cohort_total": 281,
+                "in_cohort_errors": 0,
+                "out_cohort_total": 211,
+                "out_cohort_errors": 121,
+                "in_cohort_avg_latency_ms": 252.3,
+                "out_cohort_avg_latency_ms": 243.3,
+                "sample_rows": [],
+                "cited_ids": [
+                  "cfg-301"
+                ]
+              },
+              "citations": [
+                "cfg-301"
+              ],
+              "world_entity_id": "ent_1c17d506d4f0"
+            },
+            "tags": [
+              "config_change",
+              "falsified",
+              "hypothesis",
+              "testing"
+            ],
+            "continuity_anchor": "hypothesis:H2:cfg-301",
+            "mention_count": 2,
+            "first_seen_at": "2026-10-26T11:48:16.473Z",
+            "last_seen_at": "2026-10-26T11:48:16.883Z",
+            "source_silo": "ops",
+            "primary_keys": [
+              "cfg-301"
+            ],
+            "state": "falsified",
+            "confidence": 0.04,
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": "round_1"
+          }
+        ],
+        "relations": [
+          {
+            "id": "edg_4ed3b4cddd11",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_5ad0373fc479",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.243Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_61b6f41229ca",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_75e1cca5ba10",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.278Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_a85a57de4cff",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_78b959ea1dd8",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.286Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_f1169338eb5a",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_e9d1cd9fc202",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.291Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_10c85618fdf8",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_755619a48e91",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.297Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_45d1b005301e",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_07cab3bbd8ee",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.303Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_2e362cbdb693",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_1f9bc8b65c7d",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.310Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_9df0202a2b08",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_b168a5505188",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.318Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_1636d6c328d9",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_60114f819754",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.324Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_bf14b3a87bed",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_fa9bfe9362d6",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_deployments"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.334Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_f48c4ea7c65d",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_05918e124858",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.347Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_3232feeabb79",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_cd239745dfb7",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.354Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_bd9e91312774",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_61561a1c52ff",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.363Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_93be9f6e566e",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_a3856a08f9e9",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_support_tickets"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.371Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_d18fe42f72fc",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_9644840749dc",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.383Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_640bed74d504",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_df51ce6d03f4",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.390Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_5bbd75bde55f",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_9626a94bd1d8",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.401Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_75428ae72218",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_3faeddc3007b",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.409Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_d43bdd25562c",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_79d6088b0810",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_flag_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.417Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_b5957e21fcb7",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_762c5ced1eab",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_config_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.432Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_b220bcf2e836",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_2f557977f8ac",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_config_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.441Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_dad90af7c67a",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_195818ff4530",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "ops",
+              "purpose": "round1_config_changes"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.452Z",
+            "agent_id": "PlannerAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_fa1084ebc353",
+            "from_id": "ent_5da7245ae37b",
+            "to_id": "ent_deb0f725f86f",
+            "edge_type": "investigates",
+            "properties": {
+              "category": "deployment",
+              "round": 1
+            },
+            "confidence": 0.04,
+            "created_at": "2026-10-26T11:48:16.807Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_76fac9b3d2bc",
+            "from_id": "ent_1c17d506d4f0",
+            "to_id": "ent_deb0f725f86f",
+            "edge_type": "investigates",
+            "properties": {
+              "category": "config_change",
+              "round": 1
+            },
+            "confidence": 0.04,
+            "created_at": "2026-10-26T11:48:16.889Z",
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891"
+          },
+          {
+            "id": "edg_fa2520b8dacc",
+            "from_id": "ent_deb0f725f86f",
+            "to_id": "ent_f3ac1a7c7cb3",
+            "edge_type": "cites_row",
+            "properties": {
+              "silo": "telemetry",
+              "purpose": "H1_sample_citations"
+            },
+            "confidence": 0.9,
+            "created_at": "2026-10-26T11:48:16.549Z",
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8891"
+          }
+        ],
+        "events": [
+          {
+            "snapshot_index": 0,
+            "timestamp": "2026-10-26T11:48:16.338Z",
+            "run_id": "INC-8891",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_deployments",
+            "entity_ids": [
+              "ent_5ad0373fc479",
+              "ent_75e1cca5ba10",
+              "ent_78b959ea1dd8",
+              "ent_e9d1cd9fc202",
+              "ent_755619a48e91",
+              "ent_07cab3bbd8ee",
+              "ent_1f9bc8b65c7d",
+              "ent_b168a5505188",
+              "ent_60114f819754",
+              "ent_fa9bfe9362d6"
+            ],
+            "summary": "Ingested 10 grounded records from ops (round1_deployments)"
+          },
+          {
+            "snapshot_index": 1,
+            "timestamp": "2026-10-26T11:48:16.374Z",
+            "run_id": "INC-8891",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_support_tickets",
+            "entity_ids": [
+              "ent_05918e124858",
+              "ent_cd239745dfb7",
+              "ent_61561a1c52ff",
+              "ent_a3856a08f9e9"
+            ],
+            "summary": "Ingested 4 grounded records from ops (round1_support_tickets)"
+          },
+          {
+            "snapshot_index": 2,
+            "timestamp": "2026-10-26T11:48:16.422Z",
+            "run_id": "INC-8891",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_flag_changes",
+            "entity_ids": [
+              "ent_9644840749dc",
+              "ent_df51ce6d03f4",
+              "ent_9626a94bd1d8",
+              "ent_3faeddc3007b",
+              "ent_79d6088b0810"
+            ],
+            "summary": "Ingested 5 grounded records from ops (round1_flag_changes)"
+          },
+          {
+            "snapshot_index": 3,
+            "timestamp": "2026-10-26T11:48:16.457Z",
+            "run_id": "INC-8891",
+            "agent_id": "PlannerAgent",
+            "label": "ingest:ops:round1_config_changes",
+            "entity_ids": [
+              "ent_762c5ced1eab",
+              "ent_2f557977f8ac",
+              "ent_195818ff4530"
+            ],
+            "summary": "Ingested 3 grounded records from ops (round1_config_changes)"
+          },
+          {
+            "snapshot_index": 4,
+            "timestamp": "2026-10-26T11:48:16.738Z",
+            "run_id": "INC-8891",
+            "agent_id": "ExecutorAgent",
+            "label": "ingest:telemetry:H1_sample_citations",
+            "entity_ids": [
+              "ent_f3ac1a7c7cb3",
+              "ent_f6a5875e6290",
+              "ent_98a4a66e193b",
+              "ent_7fd3414f1827",
+              "ent_376216a2e5e3",
+              "ent_9eba46a8131f"
+            ],
+            "summary": "Ingested 6 grounded records from telemetry (H1_sample_citations)"
+          },
+          {
+            "snapshot_index": 5,
+            "timestamp": "2026-10-26T11:48:16.775Z",
+            "run_id": "INC-8891",
+            "agent_id": "ExecutorAgent",
+            "label": "ingest:telemetry:H2_sample_citations",
+            "entity_ids": [],
+            "summary": "Ingested 0 grounded records from telemetry (H2_sample_citations)"
+          },
+          {
+            "snapshot_index": 6,
+            "timestamp": "2026-10-26T11:48:17.049Z",
+            "run_id": "INC-8891",
+            "agent_id": "ExecutorAgent",
+            "label": "ingest:telemetry:H3_sample_citations",
+            "entity_ids": [
+              "ent_7f6907aa6c37",
+              "ent_80f096e8fd17",
+              "ent_692cb5eeab5e",
+              "ent_4458feb59e11",
+              "ent_310b8c3bfce1",
+              "ent_b54f864b38be"
+            ],
+            "summary": "Ingested 6 grounded records from telemetry (H3_sample_citations)"
+          }
+        ],
+        "persisted_path": "meterless_world_model.json"
+      },
+      "hmem": {
+        "schema_version": "1.0.0",
+        "memory_count": 15,
+        "by_type": {
+          "factual": 5,
+          "procedural": 1,
+          "falsification": 6,
+          "invariant": 3
+        },
+        "by_layer": {
+          "short_term": 0,
+          "working": 5,
+          "long_term": 10
+        },
+        "conflicts_resolved": [],
+        "trust_profiles": {
+          "MemoryStoreService": {
+            "events": 1,
+            "last_action": "hydrate_warm_start"
+          },
+          "Orchestrator": {
+            "events": 1,
+            "last_action": "memory_added"
+          },
+          "PlannerAgent": {
+            "events": 2,
+            "last_action": "reinjection_retrieve"
+          },
+          "ExecutorAgent": {
+            "events": 4,
+            "last_action": "reinjection_retrieve"
+          },
+          "EvaluatorAgent": {
+            "events": 8,
+            "last_action": "memory_promoted"
+          },
+          "SynthesizerAgent": {
+            "events": 1,
+            "last_action": "reinjection_retrieve"
+          }
+        },
+        "memories": [
+          {
+            "id": "mem_3365db6c42e3",
+            "content": "Incident INC-8891 opened with onset 2026-10-22T14:05:00Z: Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:16.205Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 8,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_96f0967772db",
+            "content": "Schema mapping learned for {billing}.checkout_events: column repairs {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'}",
+            "memory_type": "procedural",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.493Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 7,
+            "tags": [
+              "billing",
+              "checkout_events",
+              "schema",
+              "sql_schema_repaired"
+            ],
+            "confidence": 0.99,
+            "source": "event:sql_schema_repaired",
+            "domain": "incident_investigation",
+            "namespace": "tooling/zetaris_schema",
+            "entities": [
+              "billing.checkout_events"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_31531c2289ee",
+            "content": "FALSIFIED H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm): Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause. [citations: dep-1005, tr-0008060, evt-0006224, tr-0008076, evt-0006232, tr-0008080, evt-0006234, tr-0008082, evt-0006235]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.877Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 6,
+            "tags": [
+              "dep-1005",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "dep-1005",
+              "evt-0006224",
+              "evt-0006232",
+              "evt-0006234",
+              "evt-0006235",
+              "tr-0008060",
+              "tr-0008076",
+              "tr-0008080",
+              "tr-0008082"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_55343e69844c",
+            "content": "FALSIFIED H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts): Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301. [citations: cfg-301]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.902Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 6,
+            "tags": [
+              "cfg-301",
+              "config_change",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "cfg-301"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_01e9e5c8f206",
+            "content": "VERIFIED ROOT CAUSE H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422): All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. [citations: flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120, tr-0007872, evt-0006130, tr-0007876, evt-0006132]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.323Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 3,
+            "tags": [
+              "feature_flag",
+              "flg-502",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0006119",
+              "evt-0006120",
+              "evt-0006130",
+              "evt-0006132",
+              "flg-502",
+              "tr-0007850",
+              "tr-0007852",
+              "tr-0007872",
+              "tr-0007876"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_43bb2e8e3158",
+            "content": "Incident INC-8891 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:49.829Z",
+            "last_accessed": "2026-10-26T11:48:16.934Z",
+            "access_count": 16,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_5bde4ba8f643",
+            "content": "FALSIFIED H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003)): Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn. [citations: tkt-7003, acme-logistics]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.247Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 18,
+            "tags": [
+              "falsified",
+              "hypothesis_falsified",
+              "pricing_change",
+              "tkt-7003"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "acme-logistics",
+              "tkt-7003"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_34315b8bcfc9",
+            "content": "FALSIFIED H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk): Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause. [citations: dep-1007, tr-0018948, tr-0018973, tr-0018964, tr-0018992]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.290Z",
+            "last_accessed": "2026-10-26T11:47:51.685Z",
+            "access_count": 8,
+            "tags": [
+              "dep-1007",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1007",
+              "tr-0018948",
+              "tr-0018964",
+              "tr-0018973",
+              "tr-0018992"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_1fbd40b60d96",
+            "content": "VERIFIED ROOT CAUSE H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling): All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. [citations: cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.608Z",
+            "last_accessed": "2026-10-26T11:47:50.614Z",
+            "access_count": 2,
+            "tags": [
+              "cfg-302",
+              "config_change",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_a0ee8d017a2c",
+            "content": "Incident INC-8891 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:50.644Z",
+            "last_accessed": "2026-10-26T11:48:16.213Z",
+            "access_count": 11,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_e09fa3b3273a",
+            "content": "FALSIFIED H1 (new_tax_engine feature-flag rollout (flg-505) caused checkout tax timeouts): Temporal Precedence Violation: suspected change flg-505 occurred at 2026-10-24T19:00:00Z, which is 48 minutes AFTER the anomaly started at 2026-10-24T18:12:00Z (150 error traces were already recorded before 2026-10-24T19:00:00Z). An effect cannot precede its cause. [citations: flg-505, tr-0032403, evt-0025310, tr-0032404, tr-0032756, evt-0025626, tr-0032757]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.839Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "falsified",
+              "feature_flag",
+              "flg-505",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "evt-0025310",
+              "evt-0025626",
+              "flg-505",
+              "tr-0032403",
+              "tr-0032404",
+              "tr-0032756",
+              "tr-0032757"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_438dc5ddaff3",
+            "content": "FALSIFIED H2 (Global code bug in tax-service v4.2.0 deployment (dep-1011) broke all tax calculations): Cohort Isolation Falsification: inside predicted cohort ({'service': 'tax-service', 'service_version': '4.2.0', 'scope': 'global'}) error rate is 0.00% (0/349), whereas outside cohort error rate is 61.30% (388/633). The anomaly is NOT isolated to dep-1011. [citations: dep-1011]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.865Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "dep-1011",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1011"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_30f3a601bf5b",
+            "content": "VERIFIED ROOT CAUSE H3 (Third-party upstream provider taxly-eu 504 timeout degradation in eu-west-1 amplified by 3x retry loop): All falsification checks passed for H3 (upstream-taxly-eu-504): Cohort Isolation Verified: in-cohort failure rate = 76.1% (388/510) vs out-of-cohort = 0.00% (0/472), risk_ratio = 1521.57x, z = 24.36, p = 4.03e-131. [citations: upstream-taxly-eu-504, tr-0031723, evt-0025013, tr-0031724, tr-0031729, evt-0025015, tr-0031734, evt-0025017]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:51.135Z",
+            "last_accessed": "2026-10-26T11:47:51.139Z",
+            "access_count": 2,
+            "tags": [
+              "hypothesis_verified",
+              "root_cause",
+              "upstream-taxly-eu-504",
+              "upstream_provider",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0025013",
+              "evt-0025015",
+              "evt-0025017",
+              "tr-0031723",
+              "tr-0031724",
+              "tr-0031729",
+              "tr-0031734",
+              "upstream-taxly-eu-504"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_bd4d121739dd",
+            "content": "Incident INC-8892 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:49.381Z",
+            "last_accessed": "2026-10-26T11:38:50.110Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8892",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8892"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_69c47e5e7e12",
+            "content": "Incident INC-8893 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:50.205Z",
+            "last_accessed": "2026-10-26T11:38:50.620Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8893",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8893"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8893",
+            "task_id": ""
+          }
+        ],
+        "persisted_path": "meterless_hmem.json"
+      },
+      "context_builder_manifest": {
+        "wired_services": [
+          "select_entities_by_state",
+          "select_continuity_anchors",
+          "falsification_graph_projection",
+          "cross_silo_citation_index"
+        ],
+        "wired_helpers": [
+          "select_entities_by_state",
+          "select_continuity_anchors",
+          "falsification_graph_projection",
+          "cross_silo_citation_index"
+        ],
+        "dormant_helpers": [
+          "vector_centroid_similarity",
+          "multimodal_vision_anchor"
+        ]
+      },
+      "world_model_health": {
+        "schema_version": "1.0.0",
+        "entity_count": 38,
+        "edge_count": 56,
+        "snapshot_count": 7,
+        "pipeline_runs": 7,
+        "orphan_entity_count": 0,
+        "wired_vs_helper_manifest": {
+          "wired_helpers": [
+            "select_entities_by_state",
+            "select_continuity_anchors",
+            "falsification_graph_projection",
+            "cross_silo_citation_index"
+          ],
+          "dormant_helpers": [
+            "vector_centroid_similarity",
+            "multimodal_vision_anchor"
+          ]
+        }
+      },
+      "hmem_stats": {
+        "schema_version": "1.0.0",
+        "memory_count": 15,
+        "by_type": {
+          "factual": 5,
+          "procedural": 1,
+          "falsification": 6,
+          "invariant": 3
+        },
+        "by_layer": {
+          "short_term": 0,
+          "working": 5,
+          "long_term": 10
+        },
+        "conflicts_resolved": [],
+        "trust_profiles": {
+          "MemoryStoreService": {
+            "events": 1,
+            "last_action": "hydrate_warm_start"
+          },
+          "Orchestrator": {
+            "events": 1,
+            "last_action": "memory_added"
+          },
+          "PlannerAgent": {
+            "events": 2,
+            "last_action": "reinjection_retrieve"
+          },
+          "ExecutorAgent": {
+            "events": 4,
+            "last_action": "reinjection_retrieve"
+          },
+          "EvaluatorAgent": {
+            "events": 8,
+            "last_action": "memory_promoted"
+          },
+          "SynthesizerAgent": {
+            "events": 1,
+            "last_action": "reinjection_retrieve"
+          }
+        },
+        "memories": [
+          {
+            "id": "mem_3365db6c42e3",
+            "content": "Incident INC-8891 opened with onset 2026-10-22T14:05:00Z: Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:48:16.205Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 8,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_96f0967772db",
+            "content": "Schema mapping learned for {billing}.checkout_events: column repairs {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'}",
+            "memory_type": "procedural",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.493Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 7,
+            "tags": [
+              "billing",
+              "checkout_events",
+              "schema",
+              "sql_schema_repaired"
+            ],
+            "confidence": 0.99,
+            "source": "event:sql_schema_repaired",
+            "domain": "incident_investigation",
+            "namespace": "tooling/zetaris_schema",
+            "entities": [
+              "billing.checkout_events"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "ExecutorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_31531c2289ee",
+            "content": "FALSIFIED H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm): Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause. [citations: dep-1005, tr-0008060, evt-0006224, tr-0008076, evt-0006232, tr-0008080, evt-0006234, tr-0008082, evt-0006235]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.877Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 6,
+            "tags": [
+              "dep-1005",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "dep-1005",
+              "evt-0006224",
+              "evt-0006232",
+              "evt-0006234",
+              "evt-0006235",
+              "tr-0008060",
+              "tr-0008076",
+              "tr-0008080",
+              "tr-0008082"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_55343e69844c",
+            "content": "FALSIFIED H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts): Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301. [citations: cfg-301]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:16.902Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 6,
+            "tags": [
+              "cfg-301",
+              "config_change",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "cfg-301"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_01e9e5c8f206",
+            "content": "VERIFIED ROOT CAUSE H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422): All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. [citations: flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120, tr-0007872, evt-0006130, tr-0007876, evt-0006132]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:48:17.323Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 3,
+            "tags": [
+              "feature_flag",
+              "flg-502",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0006119",
+              "evt-0006120",
+              "evt-0006130",
+              "evt-0006132",
+              "flg-502",
+              "tr-0007850",
+              "tr-0007852",
+              "tr-0007872",
+              "tr-0007876"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "INC-8891",
+            "task_id": ""
+          },
+          {
+            "id": "mem_43bb2e8e3158",
+            "content": "Incident INC-8891 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:49.829Z",
+            "last_accessed": "2026-10-26T11:48:16.934Z",
+            "access_count": 16,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_5bde4ba8f643",
+            "content": "FALSIFIED H1 (Customer-side pullback due to recent plan price increase (ticket tkt-7003)): Contract & Ledger Contradiction: billing.plan_changes has 0 rows for acme-logistics, and billing.subscriptions confirms a locked 'enterprise-annual' contract through 2027-06-30. Meanwhile telemetry.api_traces shows 2768 server-side HTTP 429 rate_limited rejections \u2014 proving the drop is server-side throttling, not customer pricing churn. [citations: tkt-7003, acme-logistics]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.247Z",
+            "last_accessed": "2026-10-26T11:48:17.337Z",
+            "access_count": 18,
+            "tags": [
+              "falsified",
+              "hypothesis_falsified",
+              "pricing_change",
+              "tkt-7003"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "acme-logistics",
+              "tkt-7003"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_34315b8bcfc9",
+            "content": "FALSIFIED H2 (api-gateway v8.1.0 deployment (envoy 1.31 upgrade) broke /v1/orders/bulk): Temporal Precedence Violation: suspected change dep-1007 occurred at 2026-10-23T03:30:00Z, which is 89 minutes AFTER the anomaly started at 2026-10-23T02:01:00Z (2038 error traces were already recorded before 2026-10-23T03:30:00Z). An effect cannot precede its cause. [citations: dep-1007, tr-0018948, tr-0018973, tr-0018964, tr-0018992]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.290Z",
+            "last_accessed": "2026-10-26T11:47:51.685Z",
+            "access_count": 8,
+            "tags": [
+              "dep-1007",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1007",
+              "tr-0018948",
+              "tr-0018964",
+              "tr-0018973",
+              "tr-0018992"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_1fbd40b60d96",
+            "content": "VERIFIED ROOT CAUSE H3 (Gateway config cfg-302 lowered enterprise burst rate limit 500->50 req/min, causing HTTP 429 throttling): All falsification checks passed for H3 (cfg-302): Cohort Isolation Verified: in-cohort failure rate = 29.7% (2768/9326) vs out-of-cohort = 0.00% (0/0), risk_ratio = 593.61x, z = 0.00, p = 1.00e+00. [citations: cfg-302, tr-0011642, tr-0011669, tr-0011687, tr-0011700]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.608Z",
+            "last_accessed": "2026-10-26T11:47:50.614Z",
+            "access_count": 2,
+            "tags": [
+              "cfg-302",
+              "config_change",
+              "hypothesis_verified",
+              "root_cause",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "cfg-302",
+              "tr-0011642",
+              "tr-0011669",
+              "tr-0011687",
+              "tr-0011700"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-7ea0eefe",
+            "task_id": ""
+          },
+          {
+            "id": "mem_a0ee8d017a2c",
+            "content": "Incident INC-8891 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:47:50.644Z",
+            "last_accessed": "2026-10-26T11:48:16.213Z",
+            "access_count": 11,
+            "tags": [
+              "INC-8891",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8891"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_e09fa3b3273a",
+            "content": "FALSIFIED H1 (new_tax_engine feature-flag rollout (flg-505) caused checkout tax timeouts): Temporal Precedence Violation: suspected change flg-505 occurred at 2026-10-24T19:00:00Z, which is 48 minutes AFTER the anomaly started at 2026-10-24T18:12:00Z (150 error traces were already recorded before 2026-10-24T19:00:00Z). An effect cannot precede its cause. [citations: flg-505, tr-0032403, evt-0025310, tr-0032404, tr-0032756, evt-0025626, tr-0032757]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.839Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "falsified",
+              "feature_flag",
+              "flg-505",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H1",
+              "evt-0025310",
+              "evt-0025626",
+              "flg-505",
+              "tr-0032403",
+              "tr-0032404",
+              "tr-0032756",
+              "tr-0032757"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_438dc5ddaff3",
+            "content": "FALSIFIED H2 (Global code bug in tax-service v4.2.0 deployment (dep-1011) broke all tax calculations): Cohort Isolation Falsification: inside predicted cohort ({'service': 'tax-service', 'service_version': '4.2.0', 'scope': 'global'}) error rate is 0.00% (0/349), whereas outside cohort error rate is 61.30% (388/633). The anomaly is NOT isolated to dep-1011. [citations: dep-1011]",
+            "memory_type": "falsification",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:50.865Z",
+            "last_accessed": "2026-10-26T11:47:51.025Z",
+            "access_count": 5,
+            "tags": [
+              "dep-1011",
+              "deployment",
+              "falsified",
+              "hypothesis_falsified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_falsified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H2",
+              "dep-1011"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_30f3a601bf5b",
+            "content": "VERIFIED ROOT CAUSE H3 (Third-party upstream provider taxly-eu 504 timeout degradation in eu-west-1 amplified by 3x retry loop): All falsification checks passed for H3 (upstream-taxly-eu-504): Cohort Isolation Verified: in-cohort failure rate = 76.1% (388/510) vs out-of-cohort = 0.00% (0/472), risk_ratio = 1521.57x, z = 24.36, p = 4.03e-131. [citations: upstream-taxly-eu-504, tr-0031723, evt-0025013, tr-0031724, tr-0031729, evt-0025015, tr-0031734, evt-0025017]",
+            "memory_type": "invariant",
+            "layer": "long_term",
+            "timestamp": "2026-10-26T11:47:51.135Z",
+            "last_accessed": "2026-10-26T11:47:51.139Z",
+            "access_count": 2,
+            "tags": [
+              "hypothesis_verified",
+              "root_cause",
+              "upstream-taxly-eu-504",
+              "upstream_provider",
+              "verified"
+            ],
+            "confidence": 0.99,
+            "source": "event:hypothesis_verified",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "H3",
+              "evt-0025013",
+              "evt-0025015",
+              "evt-0025017",
+              "tr-0031723",
+              "tr-0031724",
+              "tr-0031729",
+              "tr-0031734",
+              "upstream-taxly-eu-504"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "EvaluatorAgent",
+            "run_id": "run-aea4ffb9",
+            "task_id": ""
+          },
+          {
+            "id": "mem_bd4d121739dd",
+            "content": "Incident INC-8892 opened with onset 2026-10-23T02:01:00Z: Enterprise Tenant Order-Sync Collapse (80% Drop) vs. Pricing Complaint Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:49.381Z",
+            "last_accessed": "2026-10-26T11:38:50.110Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8892",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8892"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8892",
+            "task_id": ""
+          },
+          {
+            "id": "mem_69c47e5e7e12",
+            "content": "Incident INC-8893 opened with onset 2026-10-24T18:12:00Z: EU Checkout Latency & Retry Storm Leak vs. tax-service v4.2.0 Deploy Red Herring",
+            "memory_type": "factual",
+            "layer": "working",
+            "timestamp": "2026-10-26T11:38:50.205Z",
+            "last_accessed": "2026-10-26T11:38:50.620Z",
+            "access_count": 7,
+            "tags": [
+              "INC-8893",
+              "incident",
+              "incident_opened"
+            ],
+            "confidence": 1.0,
+            "source": "event:incident_opened",
+            "domain": "incident_investigation",
+            "namespace": "orchestration/root_cause",
+            "entities": [
+              "INC-8893"
+            ],
+            "related_to": [],
+            "supersedes": null,
+            "derived_from": [],
+            "agent_id": "Orchestrator",
+            "run_id": "INC-8893",
+            "task_id": ""
+          }
+        ],
+        "persisted_path": "meterless_hmem.json"
+      },
+      "world_model_log_file": "world_model-INC-8891.jsonl"
+    },
+    "nvidia_nemotron": {
+      "reasoning_lane_model": "nvidia/llama-3.3-nemotron-super-49b-v1",
+      "fast_lane_model": "nvidia/nvidia-nemotron-nano-9b-v2",
+      "live_api_configured": false,
+      "calls": []
+    },
+    "cursor": {
+      "role": "Primary AI development environment used for multi-agent architecture, SQL federation adapter, and test suite"
+    }
+  },
+  "alert": {
+    "incident_id": "INC-8891",
+    "title": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+    "metric": "checkout_conversion_drop",
+    "started_at": "2026-10-22T14:05:00Z",
+    "ended_at": "2026-10-22T15:10:00Z",
+    "baseline_start": "2026-10-22T12:00:00Z",
+    "baseline_end": "2026-10-22T14:00:00Z",
+    "symptom_summary": "Why did storefront checkout conversion drop sharply starting at 2026-10-22T14:05:00Z? On-call suspects checkout-service deployment v3.4.2 shipped today, and merchants brightmart and kairo-shop opened urgent tickets about iPhone payment failures. Quantify net lost revenue across billing and telemetry silos.",
+    "scenario_key": "scenario_01_deploy_red_herring",
+    "tenant_hint": null,
+    "region_hint": null,
+    "endpoint_hint": "/v1/checkout/confirm",
+    "inject_sql_mismatch": true
+  },
+  "rounds_completed": 2,
+  "hypotheses": [
+    {
+      "id": "H1",
+      "title": "checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm",
+      "category": "deployment",
+      "suspected_change_id": "dep-1005",
+      "suspected_timestamp": "2026-10-22T14:20:00Z",
+      "target_silo": "ops",
+      "target_service": "checkout-service",
+      "target_cohort": {
+        "service": "checkout-service",
+        "service_version": "3.4.2"
+      },
+      "mechanism": "Deployment dep-1005 (Refactor order summary serializer; bump stripe-python 7.1 -> 7.3) shipped at 2026-10-22T14:20:00Z and is the prime on-call suspect for Stripe checkout confirmation failures.",
+      "status": "FALSIFIED",
+      "confidence": 0.04,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 1,
+      "round_resolved": 1,
+      "falsification_reason": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+      "checks": [
+        {
+          "check_name": "temporal_precedence",
+          "passed": false,
+          "summary": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+          "observed": {
+            "incident_started_at": "2026-10-22T14:05:00Z",
+            "suspected_change_at": "2026-10-22T14:20:00Z",
+            "lag_after_onset_minutes": 15.0,
+            "errors_before_change": 31,
+            "errors_after_change": 98
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "dep-1005",
+            "tr-0008060",
+            "evt-0006224",
+            "tr-0008076",
+            "evt-0006232",
+            "tr-0008080",
+            "evt-0006234",
+            "tr-0008082",
+            "evt-0006235"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-22T14:04:42Z",
+        "errors_before_suspected_change": 31,
+        "errors_after_suspected_change": 98,
+        "in_cohort_total": 379,
+        "in_cohort_errors": 93,
+        "out_cohort_total": 113,
+        "out_cohort_errors": 28,
+        "in_cohort_avg_latency_ms": 248.5,
+        "out_cohort_avg_latency_ms": 248.3,
+        "sample_rows": [
+          {
+            "trace_id": "tr-0008060",
+            "correlation_id": "chk-0006224",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 183,
+            "event_id": "evt-0006224",
+            "tenant_id": "peak-outfitters",
+            "amount_cents": 8400,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0008076",
+            "correlation_id": "chk-0006232",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 277,
+            "event_id": "evt-0006232",
+            "tenant_id": "brightmart",
+            "amount_cents": 7805,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0008080",
+            "correlation_id": "chk-0006234",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 284,
+            "event_id": "evt-0006234",
+            "tenant_id": "brightmart",
+            "amount_cents": 14234,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0008082",
+            "correlation_id": "chk-0006235",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 262,
+            "event_id": "evt-0006235",
+            "tenant_id": "nordic-goods",
+            "amount_cents": 10990,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0008088",
+            "correlation_id": "chk-0006238",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 161,
+            "event_id": "evt-0006238",
+            "tenant_id": "kairo-shop",
+            "amount_cents": 12881,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0008108",
+            "correlation_id": "chk-0006248",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 220,
+            "event_id": "evt-0006248",
+            "tenant_id": "kairo-shop",
+            "amount_cents": 3945,
+            "failure_code": "payment_intent_unprocessable"
+          }
+        ],
+        "cited_ids": [
+          "dep-1005",
+          "tr-0008060",
+          "evt-0006224",
+          "tr-0008076",
+          "evt-0006232",
+          "tr-0008080",
+          "evt-0006234",
+          "tr-0008082",
+          "evt-0006235"
+        ]
+      },
+      "citations": [
+        "dep-1005",
+        "tr-0008060",
+        "evt-0006224",
+        "tr-0008076",
+        "evt-0006232",
+        "tr-0008080",
+        "evt-0006234",
+        "tr-0008082",
+        "evt-0006235"
+      ],
+      "world_entity_id": "ent_5da7245ae37b"
+    },
+    {
+      "id": "H2",
+      "title": "Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts",
+      "category": "config_change",
+      "suspected_change_id": "cfg-301",
+      "suspected_timestamp": "2026-10-22T13:40:00Z",
+      "target_silo": "ops",
+      "target_service": "checkout-service",
+      "target_cohort": {
+        "config_key": "stripe.api_timeout_ms",
+        "scope": "global"
+      },
+      "mechanism": "Config change cfg-301 lowered stripe.api_timeout_ms from 8000ms to 6000ms at 2026-10-22T13:40:00Z across all platforms globally.",
+      "status": "FALSIFIED",
+      "confidence": 0.04,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 1,
+      "round_resolved": 1,
+      "falsification_reason": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+      "checks": [
+        {
+          "check_name": "temporal_precedence",
+          "passed": true,
+          "summary": "Temporal Precedence Passed: cfg-301 (2026-10-22T13:40:00Z) occurred 25 minute(s) before or at anomaly onset (2026-10-22T14:05:00Z).",
+          "observed": {
+            "incident_started_at": "2026-10-22T14:05:00Z",
+            "suspected_change_at": "2026-10-22T13:40:00Z",
+            "lead_time_minutes": 25.0
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "cfg-301"
+          ]
+        },
+        {
+          "check_name": "cohort_isolation",
+          "passed": false,
+          "summary": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+          "observed": {
+            "in_cohort_errors": 0,
+            "in_cohort_total": 281,
+            "in_cohort_error_rate": 0.0,
+            "out_cohort_errors": 121,
+            "out_cohort_total": 211,
+            "out_cohort_error_rate": 0.5735
+          },
+          "p_value": 2.143e-48,
+          "z_score": -14.62,
+          "risk_ratio": 0.0,
+          "cited_ids": [
+            "cfg-301"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-22T14:04:42Z",
+        "errors_before_suspected_change": 0,
+        "errors_after_suspected_change": 129,
+        "in_cohort_total": 281,
+        "in_cohort_errors": 0,
+        "out_cohort_total": 211,
+        "out_cohort_errors": 121,
+        "in_cohort_avg_latency_ms": 252.3,
+        "out_cohort_avg_latency_ms": 243.3,
+        "sample_rows": [],
+        "cited_ids": [
+          "cfg-301"
+        ]
+      },
+      "citations": [
+        "cfg-301"
+      ],
+      "world_entity_id": "ent_1c17d506d4f0"
+    },
+    {
+      "id": "H3",
+      "title": "Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422",
+      "category": "feature_flag",
+      "suspected_change_id": "flg-502",
+      "suspected_timestamp": "2026-10-22T14:04:00Z",
+      "target_silo": "ops+telemetry+billing",
+      "target_service": "checkout-service",
+      "target_cohort": {
+        "platform": "ios",
+        "client_ver": "2.1.0",
+        "flag": "stripe_intent_v2"
+      },
+      "mechanism": "Feature flag flg-502 enabled stripe_intent_v2=100% for platform=ios;client_ver>=2.1.0 at 2026-10-22T14:04:00Z (1 minute before the 14:05 UTC drop), causing /v1/checkout/confirm to fail with HTTP 422 payment_intent_unprocessable until disabled by flg-503 at 15:10 UTC.",
+      "status": "VERIFIED",
+      "confidence": 0.96,
+      "proposed_by": "PlannerAgent",
+      "round_proposed": 2,
+      "round_resolved": 2,
+      "falsification_reason": null,
+      "checks": [
+        {
+          "check_name": "temporal_precedence",
+          "passed": true,
+          "summary": "Temporal Precedence Passed: flg-502 (2026-10-22T14:04:00Z) occurred 1 minute(s) before or at anomaly onset (2026-10-22T14:05:00Z).",
+          "observed": {
+            "incident_started_at": "2026-10-22T14:05:00Z",
+            "suspected_change_at": "2026-10-22T14:04:00Z",
+            "lead_time_minutes": 1.0
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "flg-502",
+            "tr-0007850",
+            "evt-0006119",
+            "tr-0007852",
+            "evt-0006120",
+            "tr-0007872",
+            "evt-0006130",
+            "tr-0007876",
+            "evt-0006132"
+          ]
+        },
+        {
+          "check_name": "cohort_isolation",
+          "passed": true,
+          "summary": "Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98.",
+          "observed": {
+            "in_cohort_errors": 121,
+            "in_cohort_total": 131,
+            "in_cohort_error_rate": 0.9237,
+            "out_cohort_errors": 0,
+            "out_cohort_total": 361,
+            "out_cohort_error_rate": 0.0,
+            "in_cohort_avg_latency_ms": 240.0,
+            "out_cohort_avg_latency_ms": 251.5
+          },
+          "p_value": 3.606e-98,
+          "z_score": 21.03,
+          "risk_ratio": 1847.33,
+          "cited_ids": [
+            "flg-502",
+            "tr-0007850",
+            "evt-0006119",
+            "tr-0007852",
+            "evt-0006120",
+            "tr-0007872",
+            "evt-0006130",
+            "tr-0007876",
+            "evt-0006132"
+          ]
+        },
+        {
+          "check_name": "citation_enforcement",
+          "passed": true,
+          "summary": "Cross-Silo Citation Check Passed: 9 primary-key citations linked across ops, telemetry, and billing silos (flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120).",
+          "observed": {
+            "citation_count": 9,
+            "citations": [
+              "flg-502",
+              "tr-0007850",
+              "evt-0006119",
+              "tr-0007852",
+              "evt-0006120",
+              "tr-0007872",
+              "evt-0006130",
+              "tr-0007876",
+              "evt-0006132"
+            ]
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "flg-502",
+            "tr-0007850",
+            "evt-0006119",
+            "tr-0007852",
+            "evt-0006120",
+            "tr-0007872",
+            "evt-0006130",
+            "tr-0007876",
+            "evt-0006132"
+          ]
+        },
+        {
+          "check_name": "evaluator_independent_sql_check",
+          "passed": true,
+          "summary": "Independent Evaluator SQL confirmed 121 error traces with HTTP 422 (payment_intent_unprocessable) on /v1/checkout/confirm",
+          "observed": {
+            "breakdown": [
+              {
+                "http_status": 422,
+                "error_code": "payment_intent_unprocessable",
+                "cnt": 121
+              },
+              {
+                "http_status": 402,
+                "error_code": "card_declined",
+                "cnt": 7
+              },
+              {
+                "http_status": 502,
+                "error_code": "upstream_error",
+                "cnt": 1
+              }
+            ]
+          },
+          "p_value": null,
+          "z_score": null,
+          "risk_ratio": null,
+          "cited_ids": [
+            "flg-502",
+            "tr-0007850",
+            "evt-0006119",
+            "tr-0007852"
+          ]
+        }
+      ],
+      "evidence_stats": {
+        "observed_onset": "2026-10-22T14:04:42Z",
+        "errors_before_suspected_change": 0,
+        "errors_after_suspected_change": 129,
+        "in_cohort_total": 131,
+        "in_cohort_errors": 121,
+        "out_cohort_total": 361,
+        "out_cohort_errors": 0,
+        "in_cohort_avg_latency_ms": 240.0,
+        "out_cohort_avg_latency_ms": 251.5,
+        "sample_rows": [
+          {
+            "trace_id": "tr-0007850",
+            "correlation_id": "chk-0006119",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 168,
+            "event_id": "evt-0006119",
+            "tenant_id": "brightmart",
+            "amount_cents": 13118,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0007852",
+            "correlation_id": "chk-0006120",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 268,
+            "event_id": "evt-0006120",
+            "tenant_id": "luma-home",
+            "amount_cents": 4083,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0007872",
+            "correlation_id": "chk-0006130",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 245,
+            "event_id": "evt-0006130",
+            "tenant_id": "kairo-shop",
+            "amount_cents": 12489,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0007876",
+            "correlation_id": "chk-0006132",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 201,
+            "event_id": "evt-0006132",
+            "tenant_id": "nordic-goods",
+            "amount_cents": 11223,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0007910",
+            "correlation_id": "chk-0006149",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 306,
+            "event_id": "evt-0006149",
+            "tenant_id": "peak-outfitters",
+            "amount_cents": 7716,
+            "failure_code": "payment_intent_unprocessable"
+          },
+          {
+            "trace_id": "tr-0007912",
+            "correlation_id": "chk-0006150",
+            "http_status": 422,
+            "error_code": "payment_intent_unprocessable",
+            "latency_ms": 248,
+            "event_id": "evt-0006150",
+            "tenant_id": "brightmart",
+            "amount_cents": 5751,
+            "failure_code": "payment_intent_unprocessable"
+          }
+        ],
+        "cited_ids": [
+          "flg-502",
+          "tr-0007850",
+          "evt-0006119",
+          "tr-0007852",
+          "evt-0006120",
+          "tr-0007872",
+          "evt-0006130",
+          "tr-0007876",
+          "evt-0006132"
+        ]
+      },
+      "citations": [
+        "flg-502",
+        "tr-0007850",
+        "evt-0006119",
+        "tr-0007852",
+        "evt-0006120",
+        "tr-0007872",
+        "evt-0006130",
+        "tr-0007876",
+        "evt-0006132"
+      ],
+      "world_entity_id": "ent_e0d76e0a9111"
+    }
+  ],
+  "verified_root_cause": {
+    "id": "H3",
+    "hypothesis_id": "H3",
+    "title": "Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422",
+    "category": "feature_flag",
+    "suspected_change_id": "flg-502",
+    "suspected_timestamp": "2026-10-22T14:04:00Z",
+    "mechanism": "Feature flag flg-502 enabled stripe_intent_v2=100% for platform=ios;client_ver>=2.1.0 at 2026-10-22T14:04:00Z (1 minute before the 14:05 UTC drop), causing /v1/checkout/confirm to fail with HTTP 422 payment_intent_unprocessable until disabled by flg-503 at 15:10 UTC.",
+    "confidence": 0.96,
+    "citations": [
+      "flg-502",
+      "tr-0007850",
+      "evt-0006119",
+      "tr-0007852",
+      "evt-0006120",
+      "tr-0007872",
+      "evt-0006130",
+      "tr-0007876",
+      "evt-0006132"
+    ],
+    "statistical_proof": {
+      "in_cohort_error_rate": 0.9237,
+      "out_cohort_error_rate": 0.0,
+      "in_cohort_errors": 121,
+      "in_cohort_total": 131,
+      "risk_ratio": 1847.33,
+      "z_score": 21.03,
+      "p_value": 3.606e-98
+    }
+  },
+  "falsified_hypotheses": [
+    {
+      "id": "H1",
+      "hypothesis_id": "H1",
+      "title": "checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm",
+      "category": "deployment",
+      "suspected_change_id": "dep-1005",
+      "suspected_timestamp": "2026-10-22T14:20:00Z",
+      "falsification_reason": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+      "why_falsified": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+      "failed_check": "temporal_precedence",
+      "citations": [
+        "dep-1005",
+        "tr-0008060",
+        "evt-0006224",
+        "tr-0008076",
+        "evt-0006232",
+        "tr-0008080",
+        "evt-0006234",
+        "tr-0008082",
+        "evt-0006235"
+      ]
+    },
+    {
+      "id": "H2",
+      "hypothesis_id": "H2",
+      "title": "Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts",
+      "category": "config_change",
+      "suspected_change_id": "cfg-301",
+      "suspected_timestamp": "2026-10-22T13:40:00Z",
+      "falsification_reason": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+      "why_falsified": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+      "failed_check": "cohort_isolation",
+      "citations": [
+        "cfg-301"
+      ]
+    }
+  ],
+  "financial_impact": {
+    "gross_failed_volume_usd": 10732.46,
+    "deduplicated_lost_revenue_usd": 10732.46,
+    "hourly_burn_rate_usd": 9906.89,
+    "failed_checkout_count": 129,
+    "total_checkout_count": 490,
+    "retry_inflation_factor": 1.0,
+    "affected_tenants": [
+      "brightmart",
+      "peak-outfitters",
+      "kairo-shop",
+      "nordic-goods",
+      "verde-market",
+      "luma-home"
+    ],
+    "currency": "USD",
+    "methodology_note": "Deduplicated cross-silo billing join confirmed $10,732.46 in lost revenue ($9,906.89/hr burn rate) across 129 failed checkouts/orders.",
+    "net_revenue_at_risk_usd": 10732.46
+  },
+  "executive_summary": "Root cause isolated to flg-502 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:dep-1005, H2:cfg-301) before confirming that flg-502 preceded the 2026-10-22T14:05:00Z onset and drove an in-cohort failure rate of 92.4% vs 0.00% outside the cohort (risk ratio 1847.33x, z=21.03, p=3.606e-98). Net deduplicated revenue loss: $10,732.46 ($9,906.89/hr).",
+  "remediation_plan": [
+    "Immediately disable feature flag `stripe_intent_v2` for `platform=ios;client_ver>=2.1.0` (verified by flg-503 at 15:10 UTC).",
+    "Do NOT roll back deployment dep-1005 (`checkout-service v3.4.2`) \u2014 it shipped 15 minutes after incident onset and was falsified as a red herring.",
+    "Patch iOS SDK v2.1.0 PaymentIntent confirmation payload schema before re-enabling `stripe_intent_v2`."
+  ],
+  "post_remediation_verification_sql": "SELECT platform, client_ver, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/checkout/confirm' AND platform = 'ios' GROUP BY platform, client_ver, http_status",
+  "limitations_and_caveats": [
+    "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+    "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+  ],
+  "output": {
+    "summary": "Root cause isolated to flg-502 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:dep-1005, H2:cfg-301) before confirming that flg-502 preceded the 2026-10-22T14:05:00Z onset and drove an in-cohort failure rate of 92.4% vs 0.00% outside the cohort (risk ratio 1847.33x, z=21.03, p=3.606e-98). Net deduplicated revenue loss: $10,732.46 ($9,906.89/hr).",
+    "verified_root_cause": {
+      "id": "H3",
+      "hypothesis_id": "H3",
+      "title": "Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422",
+      "category": "feature_flag",
+      "suspected_change_id": "flg-502",
+      "suspected_timestamp": "2026-10-22T14:04:00Z",
+      "mechanism": "Feature flag flg-502 enabled stripe_intent_v2=100% for platform=ios;client_ver>=2.1.0 at 2026-10-22T14:04:00Z (1 minute before the 14:05 UTC drop), causing /v1/checkout/confirm to fail with HTTP 422 payment_intent_unprocessable until disabled by flg-503 at 15:10 UTC.",
+      "confidence": 0.96,
+      "citations": [
+        "flg-502",
+        "tr-0007850",
+        "evt-0006119",
+        "tr-0007852",
+        "evt-0006120",
+        "tr-0007872",
+        "evt-0006130",
+        "tr-0007876",
+        "evt-0006132"
+      ],
+      "statistical_proof": {
+        "in_cohort_error_rate": 0.9237,
+        "out_cohort_error_rate": 0.0,
+        "in_cohort_errors": 121,
+        "in_cohort_total": 131,
+        "risk_ratio": 1847.33,
+        "z_score": 21.03,
+        "p_value": 3.606e-98
+      }
+    },
+    "falsified_red_herrings": [
+      {
+        "id": "H1",
+        "hypothesis_id": "H1",
+        "title": "checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm",
+        "category": "deployment",
+        "suspected_change_id": "dep-1005",
+        "suspected_timestamp": "2026-10-22T14:20:00Z",
+        "falsification_reason": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+        "why_falsified": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+        "failed_check": "temporal_precedence",
+        "citations": [
+          "dep-1005",
+          "tr-0008060",
+          "evt-0006224",
+          "tr-0008076",
+          "evt-0006232",
+          "tr-0008080",
+          "evt-0006234",
+          "tr-0008082",
+          "evt-0006235"
+        ]
+      },
+      {
+        "id": "H2",
+        "hypothesis_id": "H2",
+        "title": "Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts",
+        "category": "config_change",
+        "suspected_change_id": "cfg-301",
+        "suspected_timestamp": "2026-10-22T13:40:00Z",
+        "falsification_reason": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+        "why_falsified": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+        "failed_check": "cohort_isolation",
+        "citations": [
+          "cfg-301"
+        ]
+      }
+    ],
+    "financial_impact": {
+      "gross_failed_volume_usd": 10732.46,
+      "deduplicated_lost_revenue_usd": 10732.46,
+      "hourly_burn_rate_usd": 9906.89,
+      "failed_checkout_count": 129,
+      "total_checkout_count": 490,
+      "retry_inflation_factor": 1.0,
+      "affected_tenants": [
+        "brightmart",
+        "peak-outfitters",
+        "kairo-shop",
+        "nordic-goods",
+        "verde-market",
+        "luma-home"
+      ],
+      "currency": "USD",
+      "methodology_note": "Deduplicated cross-silo billing join confirmed $10,732.46 in lost revenue ($9,906.89/hr burn rate) across 129 failed checkouts/orders.",
+      "net_revenue_at_risk_usd": 10732.46
+    },
+    "recommendations": [
+      "Immediately disable feature flag `stripe_intent_v2` for `platform=ios;client_ver>=2.1.0` (verified by flg-503 at 15:10 UTC).",
+      "Do NOT roll back deployment dep-1005 (`checkout-service v3.4.2`) \u2014 it shipped 15 minutes after incident onset and was falsified as a red herring.",
+      "Patch iOS SDK v2.1.0 PaymentIntent confirmation payload schema before re-enabling `stripe_intent_v2`."
+    ],
+    "post_remediation_verification_sql": "SELECT platform, client_ver, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/checkout/confirm' AND platform = 'ios' GROUP BY platform, client_ver, http_status",
+    "limitations_and_caveats": [
+      "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+      "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+    ]
+  },
+  "result": {
+    "incident_id": "INC-8891",
+    "incident_title": "Silent Checkout Conversion Drop ($18k/hr Loss) vs. Red-Herring Deploy v3.4.2",
+    "executive_summary": "Root cause isolated to flg-502 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422). Adversarial evaluation falsified 2 competing war-room hypothesis/hypotheses (H1:dep-1005, H2:cfg-301) before confirming that flg-502 preceded the 2026-10-22T14:05:00Z onset and drove an in-cohort failure rate of 92.4% vs 0.00% outside the cohort (risk ratio 1847.33x, z=21.03, p=3.606e-98). Net deduplicated revenue loss: $10,732.46 ($9,906.89/hr).",
+    "verified_root_cause": {
+      "id": "H3",
+      "hypothesis_id": "H3",
+      "title": "Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422",
+      "category": "feature_flag",
+      "suspected_change_id": "flg-502",
+      "suspected_timestamp": "2026-10-22T14:04:00Z",
+      "mechanism": "Feature flag flg-502 enabled stripe_intent_v2=100% for platform=ios;client_ver>=2.1.0 at 2026-10-22T14:04:00Z (1 minute before the 14:05 UTC drop), causing /v1/checkout/confirm to fail with HTTP 422 payment_intent_unprocessable until disabled by flg-503 at 15:10 UTC.",
+      "confidence": 0.96,
+      "citations": [
+        "flg-502",
+        "tr-0007850",
+        "evt-0006119",
+        "tr-0007852",
+        "evt-0006120",
+        "tr-0007872",
+        "evt-0006130",
+        "tr-0007876",
+        "evt-0006132"
+      ],
+      "statistical_proof": {
+        "in_cohort_error_rate": 0.9237,
+        "out_cohort_error_rate": 0.0,
+        "in_cohort_errors": 121,
+        "in_cohort_total": 131,
+        "risk_ratio": 1847.33,
+        "z_score": 21.03,
+        "p_value": 3.606e-98
+      }
+    },
+    "falsified_red_herrings": [
+      {
+        "id": "H1",
+        "hypothesis_id": "H1",
+        "title": "checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm",
+        "category": "deployment",
+        "suspected_change_id": "dep-1005",
+        "suspected_timestamp": "2026-10-22T14:20:00Z",
+        "falsification_reason": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+        "why_falsified": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+        "failed_check": "temporal_precedence",
+        "citations": [
+          "dep-1005",
+          "tr-0008060",
+          "evt-0006224",
+          "tr-0008076",
+          "evt-0006232",
+          "tr-0008080",
+          "evt-0006234",
+          "tr-0008082",
+          "evt-0006235"
+        ]
+      },
+      {
+        "id": "H2",
+        "hypothesis_id": "H2",
+        "title": "Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts",
+        "category": "config_change",
+        "suspected_change_id": "cfg-301",
+        "suspected_timestamp": "2026-10-22T13:40:00Z",
+        "falsification_reason": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+        "why_falsified": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+        "failed_check": "cohort_isolation",
+        "citations": [
+          "cfg-301"
+        ]
+      }
+    ],
+    "financial_impact": {
+      "gross_failed_volume_usd": 10732.46,
+      "deduplicated_lost_revenue_usd": 10732.46,
+      "hourly_burn_rate_usd": 9906.89,
+      "failed_checkout_count": 129,
+      "total_checkout_count": 490,
+      "retry_inflation_factor": 1.0,
+      "affected_tenants": [
+        "brightmart",
+        "peak-outfitters",
+        "kairo-shop",
+        "nordic-goods",
+        "verde-market",
+        "luma-home"
+      ],
+      "currency": "USD",
+      "methodology_note": "Deduplicated cross-silo billing join confirmed $10,732.46 in lost revenue ($9,906.89/hr burn rate) across 129 failed checkouts/orders.",
+      "net_revenue_at_risk_usd": 10732.46
+    },
+    "remediation_plan": [
+      "Immediately disable feature flag `stripe_intent_v2` for `platform=ios;client_ver>=2.1.0` (verified by flg-503 at 15:10 UTC).",
+      "Do NOT roll back deployment dep-1005 (`checkout-service v3.4.2`) \u2014 it shipped 15 minutes after incident onset and was falsified as a red herring.",
+      "Patch iOS SDK v2.1.0 PaymentIntent confirmation payload schema before re-enabling `stripe_intent_v2`."
+    ],
+    "post_remediation_verification_sql": "SELECT platform, client_ver, http_status, COUNT(*) FROM {telemetry}.api_traces WHERE endpoint = '/v1/checkout/confirm' AND platform = 'ios' GROUP BY platform, client_ver, http_status",
+    "limitations_and_caveats": [
+      "Observational telemetry correlation + temporal precedence strongly isolate the fault cohort (p < 1e-6), but definitive causal closure requires observing error rate decay after executing the rollback step.",
+      "Financial impact reflects direct failed checkouts/orders in the incident window and excludes secondary customer LTV churn."
+    ],
+    "reviewer_revisions": 1,
+    "reviewer_issues_resolved": [
+      "Missing explicit caveat distinguishing observational cohort correlation from controlled causation",
+      "Missing post-remediation Zetaris verification SQL query for on-call validation"
+    ]
+  },
+  "trace_events": [
+    {
+      "seq": 1,
+      "timestamp": "2026-10-26T11:48:16.201Z",
+      "elapsed_ms": 8,
+      "run_id": "INC-8891",
+      "agent_name": "Orchestrator",
+      "action": "investigation_started",
+      "input_summary": "incident_id=INC-8891 scenario=scenario_01_deploy_red_herring",
+      "output_summary": "Hydrated Meterless H-MEM (15 warm memories) & opened World Model",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "sample_mode": true,
+        "zetaris_backend": "sqlite-federation",
+        "nvidia_llm_available": false
+      }
+    },
+    {
+      "seq": 2,
+      "timestamp": "2026-10-26T11:48:16.214Z",
+      "elapsed_ms": 20,
+      "run_id": "INC-8891",
+      "agent_name": "PlannerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Initial hypotheses for INC-8891 checkout_conversion_drop Why did storefront checkout conversion drop sharply starting at",
+      "output_summary": "Injected 6 H-MEM memories + 1 World Model entities",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 1,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 3,
+      "timestamp": "2026-10-26T11:48:16.485Z",
+      "elapsed_ms": 291,
+      "run_id": "INC-8891",
+      "agent_name": "PlannerAgent",
+      "action": "decompose_question",
+      "input_summary": "Incident INC-8891 (checkout_conversion_drop) onset=2026-10-22T14:05:00Z",
+      "output_summary": "Formulated 2 Round-1 hypotheses: H1 [dep-1005 @ 2026-10-22T14:20:00Z]; H2 [cfg-301 @ 2026-10-22T13:40:00Z]",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "model_lane": "reasoning (nvidia/llama-3.3-nemotron-super-49b-v1)",
+        "hypotheses": [
+          "H1",
+          "H2"
+        ],
+        "hmem_reinjected": 6,
+        "llm_note": null
+      }
+    },
+    {
+      "seq": 4,
+      "timestamp": "2026-10-26T11:48:16.488Z",
+      "elapsed_ms": 294,
+      "run_id": "INC-8891",
+      "agent_name": "ExecutorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Execute SQL verification for ['H1', 'H2'] on INC-8891",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 5,
+      "timestamp": "2026-10-26T11:48:16.490Z",
+      "elapsed_ms": 296,
+      "run_id": "INC-8891",
+      "agent_name": "ExecutorAgent",
+      "action": "TOOL_ERROR_RECOVERY",
+      "input_summary": "billing window breakdown (cross-silo column alignment) failed (SQL error: no such column: platform)",
+      "output_summary": "Inspected {billing}.checkout_events schema ['event_id', 'checkout_ref', 'tenant_id', 'created_at', 'amount_cents', 'currency', 'status', 'failure_code', 'device_os', 'app_version', 'region_code', 'channel']; repaired columns {'timestamp': 'created_at', 'platform': 'device_os', 'client_version': 'app_version', 'error_code': 'failure_code'} and retried",
+      "target_agent": "ZetarisAdapter",
+      "status": "recovered",
+      "meta": {
+        "silo": "billing",
+        "table": "checkout_events",
+        "discovered_columns": [
+          "event_id",
+          "checkout_ref",
+          "tenant_id",
+          "created_at",
+          "amount_cents",
+          "currency",
+          "status",
+          "failure_code",
+          "device_os",
+          "app_version",
+          "region_code",
+          "channel"
+        ],
+        "column_repairs": {
+          "timestamp": "created_at",
+          "platform": "device_os",
+          "client_version": "app_version",
+          "error_code": "failure_code"
+        }
+      }
+    },
+    {
+      "seq": 6,
+      "timestamp": "2026-10-26T11:48:16.796Z",
+      "elapsed_ms": 602,
+      "run_id": "INC-8891",
+      "agent_name": "ExecutorAgent",
+      "action": "query_zetaris",
+      "input_summary": "Round 1 hypotheses ['H1', 'H2']",
+      "output_summary": "Completed federated SQL queries across billing, telemetry & ops silos (backend=sqlite-federation, queries_total=19)",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "round": 1,
+        "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+        "backend": "sqlite-federation",
+        "schema_recoveries": 1
+      }
+    },
+    {
+      "seq": 7,
+      "timestamp": "2026-10-26T11:48:16.800Z",
+      "elapsed_ms": 606,
+      "run_id": "INC-8891",
+      "agent_name": "EvaluatorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Evaluate Round 1 hypotheses ['H1', 'H2'] for INC-8891",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 8,
+      "timestamp": "2026-10-26T11:48:16.882Z",
+      "elapsed_ms": 688,
+      "run_id": "INC-8891",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_FALSIFIED",
+      "input_summary": "Evaluating H1 (checkout-service v3.4.2 deployment (stripe-python 7.1->7.3 bump) broke /v1/checkout/confirm)",
+      "output_summary": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+      "target_agent": "PlannerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "round": 1,
+        "hypothesis_id": "H1",
+        "suspected_change_id": "dep-1005",
+        "checks": [
+          {
+            "check_name": "temporal_precedence",
+            "passed": false,
+            "summary": "Temporal Precedence Violation: suspected change dep-1005 occurred at 2026-10-22T14:20:00Z, which is 15 minutes AFTER the anomaly started at 2026-10-22T14:05:00Z (31 error traces were already recorded before 2026-10-22T14:20:00Z). An effect cannot precede its cause.",
+            "observed": {
+              "incident_started_at": "2026-10-22T14:05:00Z",
+              "suspected_change_at": "2026-10-22T14:20:00Z",
+              "lag_after_onset_minutes": 15.0,
+              "errors_before_change": 31,
+              "errors_after_change": 98
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "dep-1005",
+              "tr-0008060",
+              "evt-0006224",
+              "tr-0008076",
+              "evt-0006232",
+              "tr-0008080",
+              "evt-0006234",
+              "tr-0008082",
+              "evt-0006235"
+            ]
+          }
+        ],
+        "citations": [
+          "dep-1005",
+          "tr-0008060",
+          "evt-0006224",
+          "tr-0008076",
+          "evt-0006232",
+          "tr-0008080",
+          "evt-0006234",
+          "tr-0008082",
+          "evt-0006235"
+        ]
+      }
+    },
+    {
+      "seq": 9,
+      "timestamp": "2026-10-26T11:48:16.906Z",
+      "elapsed_ms": 713,
+      "run_id": "INC-8891",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_FALSIFIED",
+      "input_summary": "Evaluating H2 (Config change cfg-301 (stripe.api_timeout_ms 8000->6000) caused global Stripe timeouts)",
+      "output_summary": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+      "target_agent": "PlannerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "round": 1,
+        "hypothesis_id": "H2",
+        "suspected_change_id": "cfg-301",
+        "checks": [
+          {
+            "check_name": "temporal_precedence",
+            "passed": true,
+            "summary": "Temporal Precedence Passed: cfg-301 (2026-10-22T13:40:00Z) occurred 25 minute(s) before or at anomaly onset (2026-10-22T14:05:00Z).",
+            "observed": {
+              "incident_started_at": "2026-10-22T14:05:00Z",
+              "suspected_change_at": "2026-10-22T13:40:00Z",
+              "lead_time_minutes": 25.0
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "cfg-301"
+            ]
+          },
+          {
+            "check_name": "cohort_isolation",
+            "passed": false,
+            "summary": "Cohort Isolation Falsification: inside predicted cohort ({'config_key': 'stripe.api_timeout_ms', 'scope': 'global'}) error rate is 0.00% (0/281), whereas outside cohort error rate is 57.35% (121/211). The anomaly is NOT isolated to cfg-301.",
+            "observed": {
+              "in_cohort_errors": 0,
+              "in_cohort_total": 281,
+              "in_cohort_error_rate": 0.0,
+              "out_cohort_errors": 121,
+              "out_cohort_total": 211,
+              "out_cohort_error_rate": 0.5735
+            },
+            "p_value": 2.143e-48,
+            "z_score": -14.62,
+            "risk_ratio": 0.0,
+            "cited_ids": [
+              "cfg-301"
+            ]
+          }
+        ],
+        "citations": [
+          "cfg-301"
+        ]
+      }
+    },
+    {
+      "seq": 10,
+      "timestamp": "2026-10-26T11:48:16.909Z",
+      "elapsed_ms": 715,
+      "run_id": "INC-8891",
+      "agent_name": "PlannerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Revise plan for INC-8891 after falsifying ['cfg-301', 'dep-1005']; feedback=Falsified ['H1', 'H2']; requesting revised p",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "PlannerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 11,
+      "timestamp": "2026-10-26T11:48:16.932Z",
+      "elapsed_ms": 738,
+      "run_id": "INC-8891",
+      "agent_name": "PlannerAgent",
+      "action": "revise_plan",
+      "input_summary": "Evaluator falsified ['cfg-301', 'dep-1005']: Falsified ['H1', 'H2']; requesting revised plan from PlannerAgent.",
+      "output_summary": "Formulated Round-2 hypothesis H3: Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422 [flg-502 @ 2026-10-22T14:04:00Z]",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "falsified_change_ids": [
+          "cfg-301",
+          "dep-1005"
+        ],
+        "hmem_falsifications_loaded": 3,
+        "new_hypotheses": [
+          "H3"
+        ]
+      }
+    },
+    {
+      "seq": 12,
+      "timestamp": "2026-10-26T11:48:16.936Z",
+      "elapsed_ms": 742,
+      "run_id": "INC-8891",
+      "agent_name": "ExecutorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Execute SQL verification for ['H1', 'H2', 'H3'] on INC-8891",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "ExecutorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 13,
+      "timestamp": "2026-10-26T11:48:17.077Z",
+      "elapsed_ms": 883,
+      "run_id": "INC-8891",
+      "agent_name": "ExecutorAgent",
+      "action": "query_zetaris",
+      "input_summary": "Round 2 hypotheses ['H1', 'H2', 'H3']",
+      "output_summary": "Completed federated SQL queries across billing, telemetry & ops silos (backend=sqlite-federation, queries_total=28)",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "model_lane": "fast (nvidia/nvidia-nemotron-nano-9b-v2)",
+        "backend": "sqlite-federation",
+        "schema_recoveries": 1
+      }
+    },
+    {
+      "seq": 14,
+      "timestamp": "2026-10-26T11:48:17.085Z",
+      "elapsed_ms": 892,
+      "run_id": "INC-8891",
+      "agent_name": "EvaluatorAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Evaluate Round 2 hypotheses ['H1', 'H2', 'H3'] for INC-8891",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "EvaluatorAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 15,
+      "timestamp": "2026-10-26T11:48:17.334Z",
+      "elapsed_ms": 1141,
+      "run_id": "INC-8891",
+      "agent_name": "EvaluatorAgent",
+      "action": "HYPOTHESIS_VERIFIED",
+      "input_summary": "Evaluating H3 (Feature flag stripe_intent_v2=true rollout (flg-502 at 14:04 UTC) on iOS client v2.1.0 throwing HTTP 422)",
+      "output_summary": "All falsification checks passed for H3 (flg-502): Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98. | Independent Zetaris check confirmed (Independent Evaluator SQL confirmed 121 error traces with HTTP 422 (payment_intent_unprocessable) on /v1/checkout/confirm)",
+      "target_agent": "SynthesizerAgent",
+      "status": "success",
+      "meta": {
+        "round": 2,
+        "hypothesis_id": "H3",
+        "suspected_change_id": "flg-502",
+        "checks": [
+          {
+            "check_name": "temporal_precedence",
+            "passed": true,
+            "summary": "Temporal Precedence Passed: flg-502 (2026-10-22T14:04:00Z) occurred 1 minute(s) before or at anomaly onset (2026-10-22T14:05:00Z).",
+            "observed": {
+              "incident_started_at": "2026-10-22T14:05:00Z",
+              "suspected_change_at": "2026-10-22T14:04:00Z",
+              "lead_time_minutes": 1.0
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "flg-502",
+              "tr-0007850",
+              "evt-0006119",
+              "tr-0007852",
+              "evt-0006120",
+              "tr-0007872",
+              "evt-0006130",
+              "tr-0007876",
+              "evt-0006132"
+            ]
+          },
+          {
+            "check_name": "cohort_isolation",
+            "passed": true,
+            "summary": "Cohort Isolation Verified: in-cohort failure rate = 92.4% (121/131) vs out-of-cohort = 0.00% (0/361), risk_ratio = 1847.33x, z = 21.03, p = 3.61e-98.",
+            "observed": {
+              "in_cohort_errors": 121,
+              "in_cohort_total": 131,
+              "in_cohort_error_rate": 0.9237,
+              "out_cohort_errors": 0,
+              "out_cohort_total": 361,
+              "out_cohort_error_rate": 0.0,
+              "in_cohort_avg_latency_ms": 240.0,
+              "out_cohort_avg_latency_ms": 251.5
+            },
+            "p_value": 3.606e-98,
+            "z_score": 21.03,
+            "risk_ratio": 1847.33,
+            "cited_ids": [
+              "flg-502",
+              "tr-0007850",
+              "evt-0006119",
+              "tr-0007852",
+              "evt-0006120",
+              "tr-0007872",
+              "evt-0006130",
+              "tr-0007876",
+              "evt-0006132"
+            ]
+          },
+          {
+            "check_name": "citation_enforcement",
+            "passed": true,
+            "summary": "Cross-Silo Citation Check Passed: 9 primary-key citations linked across ops, telemetry, and billing silos (flg-502, tr-0007850, evt-0006119, tr-0007852, evt-0006120).",
+            "observed": {
+              "citation_count": 9,
+              "citations": [
+                "flg-502",
+                "tr-0007850",
+                "evt-0006119",
+                "tr-0007852",
+                "evt-0006120",
+                "tr-0007872",
+                "evt-0006130",
+                "tr-0007876",
+                "evt-0006132"
+              ]
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "flg-502",
+              "tr-0007850",
+              "evt-0006119",
+              "tr-0007852",
+              "evt-0006120",
+              "tr-0007872",
+              "evt-0006130",
+              "tr-0007876",
+              "evt-0006132"
+            ]
+          },
+          {
+            "check_name": "evaluator_independent_sql_check",
+            "passed": true,
+            "summary": "Independent Evaluator SQL confirmed 121 error traces with HTTP 422 (payment_intent_unprocessable) on /v1/checkout/confirm",
+            "observed": {
+              "breakdown": [
+                {
+                  "http_status": 422,
+                  "error_code": "payment_intent_unprocessable",
+                  "cnt": 121
+                },
+                {
+                  "http_status": 402,
+                  "error_code": "card_declined",
+                  "cnt": 7
+                },
+                {
+                  "http_status": 502,
+                  "error_code": "upstream_error",
+                  "cnt": 1
+                }
+              ]
+            },
+            "p_value": null,
+            "z_score": null,
+            "risk_ratio": null,
+            "cited_ids": [
+              "flg-502",
+              "tr-0007850",
+              "evt-0006119",
+              "tr-0007852"
+            ]
+          }
+        ],
+        "citations": [
+          "flg-502",
+          "tr-0007850",
+          "evt-0006119",
+          "tr-0007852",
+          "evt-0006120",
+          "tr-0007872",
+          "evt-0006130",
+          "tr-0007876",
+          "evt-0006132"
+        ]
+      }
+    },
+    {
+      "seq": 16,
+      "timestamp": "2026-10-26T11:48:17.341Z",
+      "elapsed_ms": 1147,
+      "run_id": "INC-8891",
+      "agent_name": "SynthesizerAgent",
+      "action": "meterless_context_reinjected",
+      "input_summary": "Synthesize root-cause brief for INC-8891",
+      "output_summary": "Injected 6 H-MEM memories + 20 World Model entities",
+      "target_agent": "SynthesizerAgent",
+      "status": "success",
+      "meta": {
+        "hmem_returned": 6,
+        "world_entities": 20,
+        "strategy": "task_focused"
+      }
+    },
+    {
+      "seq": 17,
+      "timestamp": "2026-10-26T11:48:17.343Z",
+      "elapsed_ms": 1150,
+      "run_id": "INC-8891",
+      "agent_name": "SynthesizerAgent",
+      "action": "draft_explanation",
+      "input_summary": "Verified=H3 (flg-502), Falsified=['H1', 'H2']",
+      "output_summary": "Drafted root-cause brief citing 9 primary keys across 3 silos",
+      "target_agent": "FinalReviewerAgent",
+      "status": "success",
+      "meta": {
+        "verified_hypothesis": "H3",
+        "citation_count": 9
+      }
+    },
+    {
+      "seq": 18,
+      "timestamp": "2026-10-26T11:48:17.346Z",
+      "elapsed_ms": 1152,
+      "run_id": "INC-8891",
+      "agent_name": "FinalReviewerAgent",
+      "action": "review_output",
+      "input_summary": "Auditing draft for INC-8891",
+      "output_summary": "Requested revision: Missing explicit caveat distinguishing observational cohort correlation from controlled causation; Missing post-remediation Zetaris verification SQL query for on-call validation",
+      "target_agent": "SynthesizerAgent",
+      "status": "needs_revision",
+      "meta": {
+        "issues": [
+          "Missing explicit caveat distinguishing observational cohort correlation from controlled causation",
+          "Missing post-remediation Zetaris verification SQL query for on-call validation"
+        ]
+      }
+    },
+    {
+      "seq": 19,
+      "timestamp": "2026-10-26T11:48:17.348Z",
+      "elapsed_ms": 1154,
+      "run_id": "INC-8891",
+      "agent_name": "SynthesizerAgent",
+      "action": "revise_explanation",
+      "input_summary": "Addressing 2 reviewer requirement(s)",
+      "output_summary": "Added observational-causation caveats, confidence decomposition, and post-remediation SQL check.",
+      "target_agent": "FinalReviewerAgent",
+      "status": "success",
+      "meta": {
+        "revision_count": 1
+      }
+    },
+    {
+      "seq": 20,
+      "timestamp": "2026-10-26T11:48:17.350Z",
+      "elapsed_ms": 1156,
+      "run_id": "INC-8891",
+      "agent_name": "FinalReviewerAgent",
+      "action": "approve_final",
+      "input_summary": "Revised root-cause brief for INC-8891",
+      "output_summary": "Approved final report (confidence=0.96, lost_revenue=$10,732.46)",
+      "target_agent": "APIResponse",
+      "status": "success",
+      "meta": {
+        "confidence": 0.96
+      }
+    },
+    {
+      "seq": 21,
+      "timestamp": "2026-10-26T11:48:17.351Z",
+      "elapsed_ms": 1158,
+      "run_id": "INC-8891",
+      "agent_name": "Orchestrator",
+      "action": "investigation_completed",
+      "input_summary": "Completed 2 investigative round(s) + reviewer loop",
+      "output_summary": "Root cause verified: flg-502 in 1.159s",
+      "target_agent": null,
+      "status": "success",
+      "meta": {
+        "rounds": 2,
+        "execution_time_seconds": 1.159
+      }
+    }
+  ]
+}
