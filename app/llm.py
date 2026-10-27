@@ -1,10 +1,11 @@
-"""NVIDIA Nemotron dual-lane model router (OpenAI-compatible, stdlib only).
+"""Nightshift-primary model router (OpenAI-compatible, stdlib only).
 
 Following the Meterless "injected generator" rule, agents never call a provider
 directly: they ask this router for a lane (`reasoning` or `fast`) and get back
 parsed JSON or `None`. `None` means "no model available / call failed", and every
 agent has a deterministic code path for that case. Switching providers is a
-change to MODEL_BASE_URL / MODEL_* env vars only.
+change to MODEL_PROVIDER and its environment settings. Nightshift chooses the
+concrete model behind its configured routing mode.
 """
 from __future__ import annotations
 
@@ -26,14 +27,38 @@ class ModelRouter:
         self.settings = settings
         self.tracer = tracer
         self.calls: list[dict[str, Any]] = []
-        self._disabled_reason: str | None = None if settings.llm_configured else "no MODEL_API_KEY (deterministic mode)"
+        self._disabled_reason: str | None = None if settings.llm_configured else "provider token missing or LLM disabled (deterministic mode)"
 
     @property
     def available(self) -> bool:
         return self._disabled_reason is None
 
     def model_for(self, lane: str) -> str:
+        if self.settings.model_provider == "meterless":
+            return self.settings.meterless_model
         return self.settings.model_reasoning if lane == "reasoning" else self.settings.model_fast
+
+    def headers(self, chat: bool = False) -> dict:
+        headers = {"Authorization": f"Bearer {self.settings.provider_token}", "Content-Type": "application/json", "Accept": "application/json"}
+        if self.settings.model_provider == "meterless":
+            headers["meterless-app"] = "axio"
+            if chat:
+                headers["meterless-scope"] = "user"
+        return headers
+
+    def connection_status(self, base_url: str | None = None) -> dict:
+        """Discovery verifies authentication, but does not claim a model has answered."""
+        url = base_url or self.settings.provider_url
+        try:
+            req = urllib.request.Request(url + "/models", headers=self.headers())
+            with urllib.request.urlopen(req, timeout=2) as response:
+                payload = json.load(response)
+            models = [item["id"] for item in payload.get("data", []) if isinstance(item, dict) and isinstance(item.get("id"), str) and item["id"].startswith("meterless/")]
+            return {"status": "online" if models else "offline", "base_url": url, "models": models}
+        except urllib.error.HTTPError as exc:
+            return {"status": "unauthorized" if exc.code in (401, 403) else "offline", "base_url": url, "models": []}
+        except Exception:
+            return {"status": "offline", "base_url": url, "models": []}
 
     # ------------------------------------------------------------------ core
     def generate(self, lane: str, system: str, user: str, max_tokens: int = 1200, temperature: float = 0.2) -> str | None:
@@ -46,28 +71,28 @@ class ModelRouter:
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
-        url = self.settings.model_base_url.rstrip("/") + "/chat/completions"
+        url = self.settings.provider_url + "/chat/completions"
         req = urllib.request.Request(
             url,
             data=json.dumps(body).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {self.settings.model_api_key}",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
+            headers=self.headers(chat=True),
             method="POST",
         )
         t0 = time.monotonic()
         last_err = ""
         for attempt in range(2):
             try:
-                with urllib.request.urlopen(req, timeout=self.settings.model_timeout_s) as resp:
+                with urllib.request.urlopen(req, timeout=self.settings.meterless_timeout_s if self.settings.model_provider == "meterless" else self.settings.model_timeout_s) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
                 text = payload["choices"][0]["message"].get("content") or ""
+                if not isinstance(text, str) or not text.strip():
+                    raise ValueError("Provider returned no text")
                 usage = payload.get("usage", {})
                 rec = {
                     "lane": lane,
-                    "model": model,
+                    "model": payload.get("model", model),
+                    "requested_model": model,
+                    "provider": self.settings.model_provider,
                     "latency_ms": int((time.monotonic() - t0) * 1000),
                     "prompt_tokens": usage.get("prompt_tokens"),
                     "completion_tokens": usage.get("completion_tokens"),
@@ -81,7 +106,7 @@ class ModelRouter:
                     self._disabled_reason = f"model provider rejected request ({last_err})"
                     break
             except Exception as exc:  # timeouts, DNS, malformed payloads
-                last_err = type(exc).__name__ + ": " + str(exc)[:120]
+                last_err = type(exc).__name__
             time.sleep(1.5 * (attempt + 1))
         self.calls.append({"lane": lane, "model": model, "error": last_err})
         if self.tracer:

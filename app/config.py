@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlsplit, parse_qs
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +40,11 @@ def _is_placeholder(value: str) -> bool:
 
 @dataclass
 class Settings:
+    model_provider: str = field(default_factory=lambda: os.getenv("MODEL_PROVIDER", "meterless"))
+    meterless_base_url: str = field(default_factory=lambda: os.getenv("METERLESS_BASE_URL", "http://127.0.0.1:8088/v1"))
+    meterless_runtime_token: str = field(default_factory=lambda: os.getenv("METERLESS_RUNTIME_TOKEN", ""))
+    meterless_model: str = field(default_factory=lambda: os.getenv("METERLESS_MODEL", "meterless/auto"))
+    meterless_timeout_s: float = 180
     # --- Model provider: NVIDIA Nemotron via the OpenAI-compatible API catalog ---
     model_api_key: str = field(default_factory=lambda: os.getenv("MODEL_API_KEY", ""))
     model_base_url: str = field(
@@ -82,7 +88,17 @@ class Settings:
 
     @property
     def llm_configured(self) -> bool:
-        return self.use_llm and not _is_placeholder(self.model_api_key)
+        return self.use_llm and not _is_placeholder(self.provider_token) and self.provider_token != "rt-local"
+
+    @property
+    def provider_url(self) -> str:
+        return normalize_runtime_url(self.meterless_base_url)[0] if self.model_provider == "meterless" else self.model_base_url.rstrip("/")
+
+    @property
+    def provider_token(self) -> str:
+        if self.model_provider == "meterless":
+            return normalize_runtime_url(self.meterless_base_url)[1] or self.meterless_runtime_token
+        return self.model_api_key
 
     @property
     def zetaris_configured(self) -> bool:
@@ -93,10 +109,12 @@ class Settings:
         return {
             "sample_mode": self.sample_mode,
             "llm_configured": self.llm_configured,
-            "model_base_url": self.model_base_url,
+            "model_provider": self.model_provider,
+            "model_base_url": self.provider_url,
+            "meterless_model": self.meterless_model,
             "model_reasoning": self.model_reasoning,
             "model_fast": self.model_fast,
-            "model_api_key": mask(self.model_api_key),
+            "model_api_key": "configured" if self.llm_configured else None,
             "zetaris_configured": self.zetaris_configured,
             "zetaris_rest_url": self.zetaris_rest_url or None,
             "zetaris_api_key": mask(self.zetaris_api_key),
@@ -116,3 +134,13 @@ def mask(secret: str) -> str | None:
 
 def get_settings() -> Settings:
     return Settings()
+
+
+def normalize_runtime_url(value: str) -> tuple[str, str]:
+    """Accept console URLs/connect links without exposing fragments or query secrets."""
+    value = value.strip()
+    parsed = urlsplit(value if "://" in value else "http://" + value)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
+        raise ValueError("Invalid Meterless Runtime URL")
+    token = parse_qs(parsed.fragment).get("k", [""])[0]
+    return f"{parsed.scheme}://{parsed.netloc}/v1", token

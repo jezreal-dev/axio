@@ -1,10 +1,37 @@
 # Axio — Cross-Silo Root-Cause & Silent Revenue Leak Investigator
 
+## Current submission checkpoint — 27 October 2026
+
+- Redesigned incident dashboard with evidence, SQL audit, memory and agent activity views; all three sample scenarios verified in the browser.
+- Meterless Nightshift is now the default AI provider. A real request from Axio through Nightshift returned an answer from `nvidia/nemotron-3.5-bolt-e4b`. This verifies the provider connection, not a complete live investigation.
+- Zetaris REST integration is implemented, but a live Zetaris investigation is **not yet verified**. The available Linux host has Docker/Compose; platform installation is awaiting Docker permissions and startup. Current demo data uses explicitly labelled SQLite sample federation.
+- H-MEM and World Model are local reference-architecture implementations. Persistence/reinjection tests pass; full sponsor conformance has not been established.
+- All 14 tests pass with `USE_LLM=false`. Sample results are deterministic and do not demonstrate live sponsor calls.
+
+### Current provider setup (supersedes older direct-NVIDIA model examples below)
+
+Configure NVIDIA in Nightshift's Providers tab. Put only the Nightshift connection settings in your private `.env`:
+
+```dotenv
+MODEL_PROVIDER=meterless
+METERLESS_BASE_URL=http://127.0.0.1:8088/v1
+METERLESS_RUNTIME_TOKEN=your-nightshift-runtime-token
+METERLESS_MODEL=meterless/auto
+```
+
+Run `python scripts/check_nightshift.py --chat` to verify discovery and a real response. Nightshift selects the concrete model; inspect the returned model and Nightshift receipts. Its `meterless/auto` routing ID alone does not establish NVIDIA usage. The optional old direct provider requires `MODEL_PROVIDER=nvidia`.
+
+For Zetaris, configure the provisioned instance's REST URL, organisation ID, API key and catalog mappings, then run `python scripts/check_zetaris.py --catalogs`. Only then use `SAMPLE_MODE=false`. Missing live credentials now produce an explicit error instead of silently falling back to SQLite. For completely offline evaluation, set `SAMPLE_MODE=true` and `USE_LLM=false`.
+
+Restart the application after changing `.env`. Never commit credentials. Run tests with `USE_LLM=false python -m unittest discover -s tests -v` on Linux/macOS; in PowerShell set `$env:USE_LLM='false'` before the test command. Existing SQLite connection ResourceWarnings remain.
+
+The earlier pitch/deck text below and in the submission documents describes the intended architecture; the verified status above takes precedence. Live Zetaris setup and the complete live investigation remain follow-up work.
+
 > *"War rooms waste hours debating false leads. **Axio** uses mathematical falsification to eliminate the decoys, proving the real root cause and exact dollar leak in seconds. War rooms argue over theories; Axio leaves them with axioms."*
 
 > **Open Agent Hackathon 2026** · **Track 2: The Agent That Can Explain Why**  
 > **Team Agentic Army**: Jezreal Momoh & Victor Okpe  
-> **Sponsor Technologies Integrated**: **Zetaris** · **Meterless** (World Model + H-MEM) · **NVIDIA Nemotron** · **Cursor**
+> **Sponsor architecture**: **Zetaris** (live verification pending) · **Meterless** (Nightshift + World Model + H-MEM) · **NVIDIA Nemotron** · **Cursor**
 
 ---
 

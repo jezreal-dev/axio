@@ -57,8 +57,11 @@ class ZetarisAdapter:
                 "telemetry": settings.zetaris_catalog_telemetry,
                 "ops": settings.zetaris_catalog_ops,
             }
-        else:
+        elif settings.sample_mode:
             self.backend = "sqlite-federation"
+            self.catalogs = {s: s for s in SILOS}
+        else:
+            self.backend = "unconfigured"
             self.catalogs = {s: s for s in SILOS}
 
     # ------------------------------------------------------------ public API
@@ -68,6 +71,8 @@ class ZetarisAdapter:
         Transient failures (timeouts, 5xx, 429) are retried with exponential
         backoff; each attempt is traced. Non-transient errors raise QueryError.
         """
+        if self.backend == "unconfigured":
+            raise QueryError("Live Zetaris requested but credentials are missing. Configure ZETARIS_REST_URL and ZETARIS_API_KEY, or explicitly enable SAMPLE_MODE.")
         resolved = self.resolve(sql)
         silos = sorted({s for s in SILOS if "{" + s + "}" in sql})
         attempt = 0

@@ -41,6 +41,7 @@ from urllib.parse import parse_qs, urlparse
 from app.adapters.zetaris import ZetarisAdapter
 from app.agents.orchestrator import ACTIVE_RUNS, run_investigation
 from app.config import Settings, get_settings
+from app.llm import ModelRouter
 from app.models import SCENARIO_PRESETS
 from app.sample_data import generate as seed_silos
 from app.tracing import Tracer
@@ -84,6 +85,7 @@ def build_health_payload(settings: Settings) -> dict[str, Any]:
         "track": "Track 2: The Agent That Can Explain Why",
         "team": "Agentic Army (Jezreal Momoh & Victor Okpe)",
         "config": settings.masked_summary(),
+        "nightshift": ModelRouter(settings).connection_status() if settings.model_provider == "meterless" else {"status": "not_selected"},
         "zetaris": zetaris.health(),
         "meterless": {
             "world_model_entities": len(wm.get("entities", {})),

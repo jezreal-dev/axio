@@ -140,7 +140,6 @@ def run_investigation(
             rounds=round_num,
             execution_time_seconds=elapsed_s,
         )
-        tr.close()
 
         result = {
             "run_id": run_id,
@@ -188,8 +187,9 @@ def run_investigation(
                 },
                 "meterless": meterless.snapshot_summary(),
                 "nvidia_nemotron": {
-                    "reasoning_lane_model": cfg.model_reasoning,
-                    "fast_lane_model": cfg.model_fast,
+                    "provider": cfg.model_provider,
+                    "reasoning_lane_model": llm.model_for("reasoning"),
+                    "fast_lane_model": llm.model_for("fast"),
                     "live_api_configured": llm.available,
                     "calls": llm.calls,
                 },
@@ -220,10 +220,10 @@ def run_investigation(
             "trace_events": tr.events,
         }
         ACTIVE_RUNS[run_id] = {"status": "completed", "tracer": tr, "result": result}
+        tr.close()
         return result
     except Exception as exc:
         tr.emit("Orchestrator", "investigation_failed", str(alert.incident_id), str(exc), status="error")
-        tr.close()
         err_payload = {
             "run_id": run_id,
             "request_id": run_id,
@@ -238,4 +238,5 @@ def run_investigation(
             "execution_time_seconds": round(time.monotonic() - t0, 3),
         }
         ACTIVE_RUNS[run_id] = {"status": "error", "tracer": tr, "result": err_payload}
+        tr.close()
         return err_payload

@@ -119,6 +119,25 @@ class TestIncidentWhyHTTPServer(unittest.TestCase):
             self.assertIn("Axio", slides_html)
             self.assertIn("Slide 8 of 8", slides_html)
 
+    def test_stream_completion_has_result(self) -> None:
+        from unittest.mock import patch
+        from app.tracing import Tracer
+        from app.agents.orchestrator import ACTIVE_RUNS
+
+        original_close = Tracer.close
+        completions = []
+
+        def observe_close(tracer):
+            info = ACTIVE_RUNS.get(tracer.run_id, {})
+            completions.append((info.get("status"), info.get("result")))
+            original_close(tracer)
+
+        with patch.object(Tracer, "close", observe_close):
+            run_investigation({"scenario_id": "scenario_01_deploy_red_herring"}, echo_logs=False)
+        self.assertEqual(len(completions), 1)
+        self.assertEqual(completions[0][0], "completed")
+        self.assertEqual(completions[0][1]["status"], "success")
+
     def test_post_run_endpoint(self) -> None:
         payload = json.loads((ROOT_DIR / "input_examples" / "incident_01_checkout_drop.json").read_text(encoding="utf-8"))
         req = urllib.request.Request(
