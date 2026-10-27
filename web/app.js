@@ -67,7 +67,7 @@
       ]);
       if (healthRes && healthRes.config) {
         const localData = healthRes.zetaris?.backend !== "zetaris-rest";
-        els.pillSampleMode.textContent = localData ? "Sample data" : "Zetaris data";
+        els.pillSampleMode.textContent = localData ? "Prepared incidents · synthetic data" : "Incident data from Zetaris";
         document.getElementById("pillZetaris").textContent = localData ? "Zetaris adapter · local SQLite backend" : "Zetaris · REST backend";
         els.pillNvidia.textContent = healthRes.config.model_provider === "meterless"
           ? `Nightshift · ${healthRes.nightshift?.status || "unchecked"}${healthRes.nightshift?.status === "unauthorized" ? "; set Runtime token in .env" : "; model run not yet verified"}`

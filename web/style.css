@@ -83,24 +83,7 @@ gap:12px
 font-size:29px;
 letter-spacing:-1.5px
 }
-.brand-logo {
-font-size:25px;
-font-weight:800;
-background:#243f30;
-color:#e1eccb;
-width:37px;
-height:37px;
-display:grid;
-place-content:center;
-position:relative;
-border-radius:10px
-}
-.brand-logo span {
-position:absolute;
-right:4px;
-top:-5px;
-font-size:18px
-}
+.brand-logo { width:42px; height:42px; flex:none; display:block; color:#243f30 }
 .brand-caption {
 border-left:1px solid var(--border);
 padding-left:20px;
